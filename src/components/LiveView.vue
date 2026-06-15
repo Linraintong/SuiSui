@@ -2,7 +2,6 @@
 import { ref, onMounted, onUnmounted, nextTick } from "vue"
 import videojs from "video.js"
 import "video.js/dist/video-js.css"
-import "@videojs/themes/dist/forest/index.css"
 
 const API = "/api"
 const streamUrl = ref("")
@@ -56,7 +55,7 @@ function initPlayer() {
       <p class="text-caption text-medium-emphasis mt-1">请管理员在后台配置直播流地址</p>
     </div>
     <div v-else class="video-js-wrap">
-      <video ref="videoRef" class="video-js vjs-theme-forest" playsinline />
+      <video ref="videoRef" class="video-js" playsinline />
     </div>
   </div>
 </template>
