@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from "vue"
-import ArtPlayer from "artplayer"
+import { ref, onMounted } from "vue"
+
+// Register Vidstack web components
+import "vidstack/elements"
+// Core player styles
+import "vidstack/player/styles/base.css"
 
 const API = "/api"
 const streamUrl = ref("")
 const loading = ref(true)
 const error = ref("")
-let player: ArtPlayer | null = null
 
 onMounted(async () => {
   try {
@@ -19,58 +22,7 @@ onMounted(async () => {
     error.value = "无法加载直播配置"
   }
   loading.value = false
-
-  await nextTick()
-  initPlayer()
 })
-
-onUnmounted(() => {
-  if (player) {
-    player.destroy()
-    player = null
-  }
-})
-
-async function initPlayer() {
-  if (!streamUrl.value) return
-  if (player) return
-
-  const Hls = (await import("hls.js")).default
-
-  player = new ArtPlayer({
-    container: "#artplayer-container",
-    url: streamUrl.value,
-    volume: 1,
-    isLive: true,
-    autoSize: false,
-    autoMini: false,
-    screenshot: false,
-    setting: false,
-    playbackRate: false,
-    pip: false,
-    mutex: true,
-    fullscreen: true,
-    fullscreenWeb: true,
-    customType: {
-      m3u8: function (video: HTMLVideoElement, url: string) {
-        if (Hls.isSupported()) {
-          const hls = new Hls()
-          hls.loadSource(url)
-          hls.attachMedia(video)
-        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-          video.src = url
-        }
-      },
-    },
-  })
-
-  // Enter fullscreen on first play
-  player.on("play", () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen?.()
-    }
-  })
-}
 </script>
 
 <template>
@@ -86,7 +38,11 @@ async function initPlayer() {
     <div v-else-if="error" class="live-status">
       <p class="text-body-2 text-medium-emphasis">{{ error }}</p>
     </div>
-    <div v-else id="artplayer-container" class="player-container"></div>
+    <media-player v-else class="player-container" :src="streamUrl" :live="true" stream-type="live" view-type="video" :controls="true">
+      <media-provider>
+        <video></video>
+      </media-provider>
+    </media-player>
   </div>
 </template>
 
@@ -104,22 +60,5 @@ async function initPlayer() {
 .player-container {
   width: 100%;
   height: 100%;
-}
-:deep(.art-video-player) {
-  width: 100% !important;
-  height: 100% !important;
-}
-:deep(.art-video-player video) {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: contain !important;
-}
-/* Remove ArtPlayer internal padding so controls span full width */
-:deep(.art-controls) {
-  width: 100% !important;
-  padding: 0 !important;
-}
-:deep(.art-bottom) {
-  padding: 0 !important;
 }
 </style>
