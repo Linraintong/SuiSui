@@ -38,6 +38,7 @@ function initPlayer() {
     fluid: true,
     liveui: true,
     responsive: true,
+    inactivityTimeout: 0,
     sources: [{ src: streamUrl.value, type: "application/x-mpegURL" }],
   })
 }
@@ -54,7 +55,7 @@ function initPlayer() {
       <p class="text-caption text-medium-emphasis mt-1">请管理员在后台配置直播流地址</p>
     </div>
     <div v-else class="video-js-wrap">
-      <video ref="videoRef" class="video-js vjs-theme-city" playsinline />
+      <video ref="videoRef" class="video-js" playsinline />
     </div>
   </div>
 </template>
@@ -80,20 +81,5 @@ function initPlayer() {
 .live-page .video-js {
   width: 100%;
   height: 100%;
-}
-/* City skin — dark glass-like UI */
-.vjs-theme-city {
-  --vjs-theme-city--primary: #fff;
-  --vjs-theme-city--secondary: rgba(255,255,255,0.15);
-}
-.vjs-theme-city .vjs-control-bar {
-  background: linear-gradient(transparent, rgba(0,0,0,0.7));
-  padding-top: 24px;
-}
-.vjs-theme-city .vjs-play-progress {
-  background: linear-gradient(90deg, #4fc3f7, #ab47bc);
-}
-.vjs-theme-city .vjs-volume-level {
-  background: linear-gradient(90deg, #4fc3f7, #ab47bc);
 }
 </style>
