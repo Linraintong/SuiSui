@@ -3,11 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strings"
 	"time"
 )
@@ -180,40 +177,12 @@ func handleNotes(w http.ResponseWriter, r *http.Request, path string) {
 			errResp(w, "unauthorized", 401)
 			return
 		}
-		r.Body = http.MaxBytesReader(w, r.Body, 10<<20)
-		if err := r.ParseMultipartForm(10 << 20); err != nil {
-			errResp(w, "文件过大，最大 10MB", 400)
-			return
-		}
-		defer r.MultipartForm.RemoveAll()
-		file, header, err := r.FormFile("image")
+		url, err := saveUploadedFile(w, r, "image")
 		if err != nil {
-			errResp(w, "文件读取失败", 400)
-			return
-		}
-		defer file.Close()
-		ext := filepath.Ext(header.Filename)
-		if ext != "" {
-			ext = strings.ToLower(ext)
-		}
-		if !allowedUploadExts[ext] {
 			errResp(w, "不支持的文件格式", 400)
 			return
 		}
-		name := fmt.Sprintf("%d%s", time.Now().UnixNano(), ext)
-		dir := uploadsDir()
-		os.MkdirAll(dir, 0755)
-		dst, err := os.Create(filepath.Join(dir, name))
-		if err != nil {
-			errResp(w, "文件写入失败", 500)
-			return
-		}
-		defer dst.Close()
-		if _, err := io.Copy(dst, file); err != nil {
-			errResp(w, "文件写入失败", 500)
-			return
-		}
-		jsonResp(w, uploadResponse{Success: true, URL: "/uploads/" + name})
+		jsonResp(w, uploadResponse{Success: true, URL: url})
 
 	case strings.HasSuffix(path, "/react") && (r.Method == "POST" || r.Method == "DELETE"):
 		noteId := strings.TrimSuffix(strings.TrimPrefix(path, "/notes/"), "/react")

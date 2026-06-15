@@ -11,8 +11,6 @@ import (
 	"strings"
 	"syscall"
 	"time"
-
-	_ "modernc.org/sqlite"
 )
 
 // Version is set at build time via -ldflags, fallback to "dev" in local builds.

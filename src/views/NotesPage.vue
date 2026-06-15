@@ -10,6 +10,7 @@ import InlineEditor from "@/components/InlineEditor.vue"
 import SidePanel from "@/components/SidePanel.vue"
 import ZoomOverlay from "@/components/ZoomOverlay.vue"
 import TrashDialog from "@/components/TrashDialog.vue"
+import { tagColor } from "@/utils/color"
 
 defineProps<{ mobileHeatmap: boolean }>()
 const emit = defineEmits<{ "close-heatmap": [] }>()
@@ -24,12 +25,6 @@ const localSearch = ref("")
 const selectedTag = ref("")
 const selectedDay = ref("")
 const viewMode = ref<"list" | "timeline">("list")
-
-const TAG_COLORS = ["primary", "teal", "orange", "pink", "indigo", "brown", "cyan", "deep-purple", "amber", "blue-grey"]
-function tagColor(tag: string) {
-  let h = 0; for (let i = 0; i < tag.length; i++) h = (h * 31 + tag.charCodeAt(i)) | 0
-  return TAG_COLORS[Math.abs(h) % TAG_COLORS.length]
-}
 
 const siteIcp = ref("")
 const versionText = ref("")

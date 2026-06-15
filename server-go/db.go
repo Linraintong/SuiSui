@@ -7,6 +7,8 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -277,6 +279,61 @@ func verifyToken(r *http.Request) (string, bool) {
 		return "", false
 	}
 	return username, true
+}
+
+// requireRole verifies the request is authenticated and the user has the given role.
+// If role is empty, it just checks authentication.
+func requireRole(r *http.Request, role string) (string, bool) {
+	username, valid := verifyToken(r)
+	if !valid {
+		return "", false
+	}
+	if role == "" {
+		return username, true
+	}
+	var userRole string
+	if err := db.QueryRow("SELECT role FROM users WHERE username=?", username).Scan(&userRole); err != nil {
+		return "", false
+	}
+	if userRole != role {
+		return "", false
+	}
+	return username, true
+}
+
+// requireAdmin is a shorthand for requireRole(r, "admin").
+func requireAdmin(r *http.Request) (string, bool) {
+	return requireRole(r, "admin")
+}
+
+// saveUploadedFile saves a file from a multipart form and returns its URL path.
+func saveUploadedFile(w http.ResponseWriter, r *http.Request, fieldName string) (string, error) {
+	r.Body = http.MaxBytesReader(w, r.Body, 10<<20)
+	if err := r.ParseMultipartForm(10 << 20); err != nil {
+		return "", fmt.Errorf("file too large")
+	}
+	defer r.MultipartForm.RemoveAll()
+	file, header, err := r.FormFile(fieldName)
+	if err != nil {
+		return "", fmt.Errorf("file read failed")
+	}
+	defer file.Close()
+	ext := strings.ToLower(filepath.Ext(header.Filename))
+	if !allowedUploadExts[ext] {
+		return "", fmt.Errorf("unsupported format")
+	}
+	name := fmt.Sprintf("%d%s", time.Now().UnixNano(), ext)
+	dir := uploadsDir()
+	os.MkdirAll(dir, 0755)
+	dst, err := os.Create(filepath.Join(dir, name))
+	if err != nil {
+		return "", fmt.Errorf("file write failed")
+	}
+	defer dst.Close()
+	if _, err := io.Copy(dst, file); err != nil {
+		return "", fmt.Errorf("file write failed")
+	}
+	return "/uploads/" + name, nil
 }
 
 func cors(w http.ResponseWriter) {

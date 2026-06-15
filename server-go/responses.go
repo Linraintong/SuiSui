@@ -90,10 +90,6 @@ type successResponse struct {
 	Success string `json:"success"`
 }
 
-type successBoolResponse struct {
-	Success bool `json:"success"`
-}
-
 type healthResponse struct {
 	Status          string `json:"status"`
 	DBSchemaVersion int    `json:"dbSchemaVersion"`

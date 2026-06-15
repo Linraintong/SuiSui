@@ -30,16 +30,8 @@ func handleSettings(w http.ResponseWriter, r *http.Request) {
 		}
 		jsonResp(w, s)
 	} else if r.Method == "POST" {
-		tokenUser, tokenValid := verifyToken(r)
-		if !tokenValid {
-			errResp(w, "unauthorized", 401)
-			return
-		}
-		var callerRole string
-		if err := db.QueryRow("SELECT role FROM users WHERE username=?", tokenUser).Scan(&callerRole); err != nil {
-			log.Printf("failed to query role: %v", err)
-		}
-		if callerRole != "admin" {
+		_, ok := requireAdmin(r)
+		if !ok {
 			errResp(w, "forbidden", 403)
 			return
 		}
@@ -59,13 +51,8 @@ func handleSettings(w http.ResponseWriter, r *http.Request) {
 func handleAdmin(w http.ResponseWriter, r *http.Request, path string) {
 	switch {
 	case path == "/admin/stats":
-		tokenUser, tokenValid := verifyToken(r)
-		if !tokenValid {
-			errResp(w, "unauthorized", 401)
-			return
-		}
-		var callerRole string
-		if err := db.QueryRow("SELECT role FROM users WHERE username=?", tokenUser).Scan(&callerRole); err != nil || callerRole != "admin" {
+		_, ok := requireAdmin(r)
+		if !ok {
 			errResp(w, "forbidden", 403)
 			return
 		}
@@ -79,18 +66,8 @@ func handleAdmin(w http.ResponseWriter, r *http.Request, path string) {
 		jsonResp(w, adminStatsResponse{TotalUsers: users, TotalNotes: notes})
 
 	case path == "/admin/users":
-		tokenUser, tokenValid := verifyToken(r)
-		if !tokenValid {
-			errResp(w, "unauthorized", 401)
-			return
-		}
-		var callerRole string
-		if err := db.QueryRow("SELECT role FROM users WHERE username=?", tokenUser).Scan(&callerRole); err != nil {
-			log.Printf("failed to query caller role: %v", err)
-			errResp(w, "查询数据时发生错误", 500)
-			return
-		}
-		if callerRole != "admin" {
+		_, ok := requireAdmin(r)
+		if !ok {
 			errResp(w, "forbidden", 403)
 			return
 		}
@@ -158,20 +135,12 @@ func handleAdmin(w http.ResponseWriter, r *http.Request, path string) {
 
 	default:
 		parts := strings.Split(strings.TrimPrefix(path, "/admin/users/"), "/")
-		tokenUser, tokenValid := verifyToken(r)
-		if !tokenValid {
-			errResp(w, "unauthorized", 401)
+		_, ok := requireAdmin(r)
+		if !ok {
+			errResp(w, "forbidden", 403)
 			return
 		}
-		var callerRole string
-		if err := db.QueryRow("SELECT role FROM users WHERE username=?", tokenUser).Scan(&callerRole); err != nil {
-			log.Printf("failed to query caller role: %v", err)
-		}
 		if len(parts) == 1 && r.Method == "DELETE" {
-			if callerRole != "admin" {
-				errResp(w, "forbidden", 403)
-				return
-			}
 			var username string
 			if err := db.QueryRow("SELECT username FROM users WHERE id=?", parts[0]).Scan(&username); err != nil {
 				errResp(w, "用户不存在", 404)

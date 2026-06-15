@@ -1,91 +1,39 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from "vue"
-import videojs from "video.js"
-import "video.js/dist/video-js.css"
+import { onMounted, onUnmounted } from "vue"
+import ArtPlayer from "artplayer"
+import Hls from "hls.js"
 
-const API = "/api"
-const streamUrl = ref("")
-const loading = ref(true)
-const error = ref("")
-const videoRef = ref<HTMLVideoElement | null>(null)
-let player: ReturnType<typeof videojs> | null = null
+let player: ArtPlayer | null = null
 
 onMounted(async () => {
-  try {
-    const r = await fetch(`${API}/live/config`)
-    if (r.ok) {
-      const data = await r.json()
-      streamUrl.value = data.streamUrl || ""
-    }
-  } catch {
-    error.value = "无法加载直播配置"
-  }
-  loading.value = false
-  await nextTick()
-  initPlayer()
-})
-
-onUnmounted(() => {
-  player?.dispose()
-})
-
-function initPlayer() {
-  if (!streamUrl.value || !videoRef.value) return
-  player = videojs(videoRef.value, {
-    autoplay: true,
-    muted: true,
-    controls: true,
-    fluid: true,
-    liveui: true,
-    responsive: true,
-    inactivityTimeout: 0,
-    sources: [{ src: streamUrl.value, type: "application/x-mpegURL" }],
+  let url = ""
+  try { url = (await (await fetch("/api/live/config")).json()).streamUrl } catch { /* ignore */ }
+  if (!url) return
+  await new Promise(r => setTimeout(r, 100)) // wait for DOM
+  player = new ArtPlayer({
+    container: "#artplayer-container",
+    url,
+    isLive: true,
+    fullscreen: true,
+    customType: {
+      m3u8(video, url) {
+        const hls = new Hls()
+        hls.loadSource(url)
+        hls.attachMedia(video)
+      },
+    },
   })
-}
+})
+
+onUnmounted(() => player?.destroy())
 </script>
 
 <template>
-  <div class="live-page">
-    <div v-if="loading" class="live-status">
-      <p class="text-body-2 text-medium-emphasis mt-2">加载直播...</p>
-    </div>
-    <div v-else-if="!streamUrl" class="live-status">
-      <v-icon size="48" color="rgba(255,255,255,0.3)" class="mb-2">mdi-video-off-outline</v-icon>
-      <p class="text-body-2 text-medium-emphasis mt-3">直播流未配置</p>
-      <p class="text-caption text-medium-emphasis mt-1">请管理员在后台配置直播流地址</p>
-    </div>
-    <div v-else class="video-js-wrap">
-      <video ref="videoRef" class="video-js" playsinline />
-    </div>
-  </div>
+  <div id="artplayer-container" class="live-page" />
 </template>
 
-<style scoped>
-.live-page {
-  width: 100vw;
-  height: 100vh;
-  background: #000;
-  overflow: hidden;
-}
-.live-status {
-  text-align: center;
-  color: rgba(255, 255, 255, 0.6);
-}
-.video-js-wrap {
-  width: 100%;
-  height: 100%;
-}
-</style>
-
 <style>
-.live-page .video-js {
-  width: 100%;
-  height: 100%;
-}
-.live-page .vjs-control-bar {
-  width: 100% !important;
-  max-width: none !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-}
+.live-page { width: 100vw; height: 100vh; background: #000; overflow: hidden; }
+.art-video-player { width: 100% !important; height: 100% !important; }
+.art-video-player video { width: 100% !important; height: 100% !important; object-fit: contain !important; }
 </style>
