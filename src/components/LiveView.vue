@@ -40,9 +40,6 @@ function initPlayer() {
     })
   } else if (vid.canPlayType("application/vnd.apple.mpegurl")) {
     vid.src = streamUrl.value
-    vid.addEventListener("loadedmetadata", () => {
-      vid.play().catch(() => {})
-    })
   }
 }
 </script>
