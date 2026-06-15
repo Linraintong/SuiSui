@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue"
+import { ref, computed } from "vue"
 import { useTheme } from "vuetify"
 
 const THEME_PRESET_KEY = "suisui-theme-preset"
@@ -21,7 +21,7 @@ const presets: Record<string, Preset> = {
 const visible = defineModel<boolean>("modelValue", { required: true })
 const vuetify = useTheme()
 const current = ref(localStorage.getItem(THEME_PRESET_KEY) || "default")
-const isDark = ref(vuetify.global.name.value === "dark")
+const isDark = computed(() => vuetify.global.name.value === "dark")
 
 function pick(id: string) {
   const p = presets[id]
@@ -33,8 +33,8 @@ function pick(id: string) {
   visible.value = false
 }
 
-function toggleDark() {
-  const theme = isDark.value ? "dark" : "light"
+function setDark(v: boolean) {
+  const theme = v ? "dark" : "light"
   vuetify.global.name.value = theme
   localStorage.setItem(THEME_KEY, theme)
   const p = presets[current.value]
@@ -64,8 +64,8 @@ function toggleDark() {
       <div class="d-flex align-center justify-space-between px-1">
         <span class="text-body-2">外观</span>
         <div class="mode-toggle">
-          <button class="mode-btn" :class="{ active: !isDark }" @click="isDark = false; toggleDark()">☀️ 浅色</button>
-          <button class="mode-btn" :class="{ active: isDark }" @click="isDark = true; toggleDark()">🌙 深色</button>
+          <button class="mode-btn" :class="{ active: !isDark }" @click="setDark(false)">☀️ 浅色</button>
+          <button class="mode-btn" :class="{ active: isDark }" @click="setDark(true)">🌙 深色</button>
         </div>
       </div>
     </v-card>
