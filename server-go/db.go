@@ -296,7 +296,8 @@ func securityHeaders(w http.ResponseWriter) {
 			"img-src 'self' data: blob:; "+
 			"font-src 'self' data:; "+
 			"media-src 'self' blob:; "+
-			"connect-src 'self' https: blob:; "+
+			"connect-src 'self' http: https: blob:; "+
+			"worker-src 'self' blob:; "+
 			"frame-ancestors 'none'; "+
 			"form-action 'self'")
 }
