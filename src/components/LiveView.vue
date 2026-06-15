@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick } from "vue"
-import Hls from "hls.js"
+import ArtPlayer from "artplayer"
 
 const API = "/api"
 const streamUrl = ref("")
 const loading = ref(true)
 const error = ref("")
-const videoRef = ref<HTMLVideoElement | null>(null)
-let hls: Hls | null = null
+let player: ArtPlayer | null = null
 
 onMounted(async () => {
   try {
@@ -25,22 +24,41 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  hls?.destroy()
+  player?.destroy()
 })
 
-function initPlayer() {
-  if (!streamUrl.value || !videoRef.value) return
-  const vid = videoRef.value
-  if (Hls.isSupported()) {
-    hls = new Hls()
-    hls.loadSource(streamUrl.value)
-    hls.attachMedia(vid)
-    hls.on(Hls.Events.MANIFEST_PARSED, () => {
-      vid.play().catch(() => {})
-    })
-  } else if (vid.canPlayType("application/vnd.apple.mpegurl")) {
-    vid.src = streamUrl.value
-  }
+async function initPlayer() {
+  if (!streamUrl.value) return
+  if (player) return
+
+  const Hls = (await import("hls.js")).default
+
+  player = new ArtPlayer({
+    container: "#artplayer-container",
+    url: streamUrl.value,
+    volume: 1,
+    isLive: true,
+    autoSize: false,
+    autoMini: false,
+    screenshot: false,
+    setting: false,
+    playbackRate: false,
+    pip: false,
+    mutex: true,
+    fullscreen: true,
+    fullscreenWeb: true,
+    customType: {
+      m3u8(video: HTMLVideoElement, url: string) {
+        if (Hls.isSupported()) {
+          const hls = new Hls()
+          hls.loadSource(url)
+          hls.attachMedia(video)
+        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+          video.src = url
+        }
+      },
+    },
+  })
 }
 </script>
 
@@ -57,7 +75,7 @@ function initPlayer() {
     <div v-else-if="error" class="live-status">
       <p class="text-body-2 text-medium-emphasis">{{ error }}</p>
     </div>
-    <video v-else ref="videoRef" class="player-video" controls autoplay playsinline muted />
+    <div v-else id="artplayer-container" class="player-container" />
   </div>
 </template>
 
@@ -67,18 +85,29 @@ function initPlayer() {
   height: 100vh;
   background: #000;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 .live-status {
   text-align: center;
   color: rgba(255, 255, 255, 0.6);
 }
-.player-video {
+.player-container {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  display: block;
+}
+:deep(.art-video-player) {
+  width: 100% !important;
+  height: 100% !important;
+}
+:deep(.art-video-player video) {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+}
+:deep(.art-controls) {
+  width: 100% !important;
+  padding: 0 !important;
+}
+:deep(.art-bottom) {
+  padding: 0 !important;
 }
 </style>
