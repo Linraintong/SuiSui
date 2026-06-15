@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick } from "vue"
-import ArtPlayer from "artplayer"
+import videojs from "video.js"
+import "video.js/dist/video-js.css"
 
 const API = "/api"
 const streamUrl = ref("")
 const loading = ref(true)
 const error = ref("")
-let player: ArtPlayer | null = null
+const videoRef = ref<HTMLVideoElement | null>(null)
+let player: ReturnType<typeof videojs> | null = null
 
 onMounted(async () => {
   try {
@@ -24,40 +26,19 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  player?.destroy()
+  player?.dispose()
 })
 
-async function initPlayer() {
-  if (!streamUrl.value) return
-  if (player) return
-
-  const Hls = (await import("hls.js")).default
-
-  player = new ArtPlayer({
-    container: "#artplayer-container",
-    url: streamUrl.value,
-    volume: 1,
-    isLive: true,
-    autoSize: false,
-    autoMini: false,
-    screenshot: false,
-    setting: false,
-    playbackRate: false,
-    pip: false,
-    mutex: true,
-    fullscreen: true,
-    fullscreenWeb: true,
-    customType: {
-      m3u8(video: HTMLVideoElement, url: string) {
-        if (Hls.isSupported()) {
-          const hls = new Hls()
-          hls.loadSource(url)
-          hls.attachMedia(video)
-        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-          video.src = url
-        }
-      },
-    },
+function initPlayer() {
+  if (!streamUrl.value || !videoRef.value) return
+  player = videojs(videoRef.value, {
+    autoplay: true,
+    muted: true,
+    controls: true,
+    fluid: true,
+    liveui: true,
+    responsive: true,
+    sources: [{ src: streamUrl.value, type: "application/x-mpegURL" }],
   })
 }
 </script>
@@ -72,10 +53,9 @@ async function initPlayer() {
       <p class="text-body-2 text-medium-emphasis mt-3">直播流未配置</p>
       <p class="text-caption text-medium-emphasis mt-1">请管理员在后台配置直播流地址</p>
     </div>
-    <div v-else-if="error" class="live-status">
-      <p class="text-body-2 text-medium-emphasis">{{ error }}</p>
+    <div v-else class="video-js-wrap">
+      <video ref="videoRef" class="video-js vjs-theme-city" playsinline />
     </div>
-    <div v-else id="artplayer-container" class="player-container" />
   </div>
 </template>
 
@@ -90,24 +70,30 @@ async function initPlayer() {
   text-align: center;
   color: rgba(255, 255, 255, 0.6);
 }
-.player-container {
+.video-js-wrap {
   width: 100%;
   height: 100%;
 }
-:deep(.art-video-player) {
-  width: 100% !important;
-  height: 100% !important;
+</style>
+
+<style>
+.live-page .video-js {
+  width: 100%;
+  height: 100%;
 }
-:deep(.art-video-player video) {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: contain !important;
+/* City skin — dark glass-like UI */
+.vjs-theme-city {
+  --vjs-theme-city--primary: #fff;
+  --vjs-theme-city--secondary: rgba(255,255,255,0.15);
 }
-:deep(.art-controls) {
-  width: 100% !important;
-  padding: 0 !important;
+.vjs-theme-city .vjs-control-bar {
+  background: linear-gradient(transparent, rgba(0,0,0,0.7));
+  padding-top: 24px;
 }
-:deep(.art-bottom) {
-  padding: 0 !important;
+.vjs-theme-city .vjs-play-progress {
+  background: linear-gradient(90deg, #4fc3f7, #ab47bc);
+}
+.vjs-theme-city .vjs-volume-level {
+  background: linear-gradient(90deg, #4fc3f7, #ab47bc);
 }
 </style>
