@@ -58,6 +58,7 @@ onMounted(async () => {
   color: rgba(255, 255, 255, 0.6);
 }
 .player-container {
+  display: block;
   width: 100%;
   height: 100%;
 }
