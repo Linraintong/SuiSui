@@ -82,4 +82,10 @@ function initPlayer() {
   width: 100%;
   height: 100%;
 }
+.live-page .vjs-control-bar {
+  width: 100% !important;
+  max-width: none !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
 </style>
