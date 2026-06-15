@@ -1,15 +1,13 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
-
-// Register Vidstack web components
-import "vidstack/elements"
-// Core player styles
-import "vidstack/player/styles/base.css"
+import { ref, onMounted, onUnmounted, nextTick } from "vue"
+import Hls from "hls.js"
 
 const API = "/api"
 const streamUrl = ref("")
 const loading = ref(true)
 const error = ref("")
+const videoRef = ref<HTMLVideoElement | null>(null)
+let hls: Hls | null = null
 
 onMounted(async () => {
   try {
@@ -22,7 +20,31 @@ onMounted(async () => {
     error.value = "无法加载直播配置"
   }
   loading.value = false
+  await nextTick()
+  initPlayer()
 })
+
+onUnmounted(() => {
+  hls?.destroy()
+})
+
+function initPlayer() {
+  if (!streamUrl.value || !videoRef.value) return
+  const vid = videoRef.value
+  if (Hls.isSupported()) {
+    hls = new Hls()
+    hls.loadSource(streamUrl.value)
+    hls.attachMedia(vid)
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      vid.play().catch(() => {})
+    })
+  } else if (vid.canPlayType("application/vnd.apple.mpegurl")) {
+    vid.src = streamUrl.value
+    vid.addEventListener("loadedmetadata", () => {
+      vid.play().catch(() => {})
+    })
+  }
+}
 </script>
 
 <template>
@@ -38,11 +60,7 @@ onMounted(async () => {
     <div v-else-if="error" class="live-status">
       <p class="text-body-2 text-medium-emphasis">{{ error }}</p>
     </div>
-    <media-player v-else class="player-container" :src="streamUrl" :live="true" stream-type="live" view-type="video" :controls="true">
-      <media-provider>
-        <video></video>
-      </media-provider>
-    </media-player>
+    <video v-else ref="videoRef" class="player-video" controls autoplay playsinline muted />
   </div>
 </template>
 
@@ -52,14 +70,18 @@ onMounted(async () => {
   height: 100vh;
   background: #000;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .live-status {
   text-align: center;
   color: rgba(255, 255, 255, 0.6);
 }
-.player-container {
-  display: block;
+.player-video {
   width: 100%;
   height: 100%;
+  object-fit: contain;
+  display: block;
 }
 </style>
