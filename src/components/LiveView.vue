@@ -37,12 +37,10 @@ onMounted(async () => {
 }
 
 /* Fill viewport — live-video-player has display: contents,
-   so the skin renders as the immediate child of .live-page */
-live-video-player,
+   so the skin needs explicit height to fill the page */
 live-video-skin {
   width: 100% !important;
   height: 100% !important;
-  display: block !important;
 }
 
 /* Reset border-radius on fullscreen player to avoid clipped corners */
