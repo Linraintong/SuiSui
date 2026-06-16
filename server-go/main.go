@@ -18,14 +18,6 @@ var Version = "dev"
 var serverPort = "3742"
 var githubToken = ""
 
-
-
-
-
-
-
-
-
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -37,9 +29,15 @@ func main() {
 	for i := 1; i < len(os.Args); i++ {
 		switch os.Args[i] {
 		case "-port":
-			if i+1 < len(os.Args) { port = os.Args[i+1]; i++ }
+			if i+1 < len(os.Args) {
+				port = os.Args[i+1]
+				i++
+			}
 		case "-data":
-			if i+1 < len(os.Args) { dataDir = os.Args[i+1]; i++ }
+			if i+1 < len(os.Args) {
+				dataDir = os.Args[i+1]
+				i++
+			}
 		}
 	}
 
@@ -49,7 +47,6 @@ func main() {
 	go startLoginRateLimitCleanup()
 
 	serverPort = port
-
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/", handleAPI)
@@ -84,16 +81,6 @@ func main() {
 	log.Println("Server stopped")
 }
 
-
-
-
-
-
-
-
-
-
-
 func handleHealth(w http.ResponseWriter, r *http.Request) {
 	var dbVer int
 	err := db.QueryRow("SELECT COALESCE(MAX(version), 0) FROM schema_version").Scan(&dbVer)
@@ -119,10 +106,17 @@ func handleAPI(w http.ResponseWriter, r *http.Request) {
 	case strings.HasPrefix(path, "/auth/"):
 		handleAuth(w, r, path)
 	case strings.HasPrefix(path, "/notes"):
-		if path == "/notes/export" { handleNotesExport(w, r); return }
-		if path == "/notes/import" { handleNotesImport(w, r); return }
+		if path == "/notes/export" {
+			handleNotesExport(w, r)
+			return
+		}
+		if path == "/notes/import" {
+			handleNotesImport(w, r)
+			return
+		}
 		if strings.HasSuffix(path, "/restore") || strings.HasSuffix(path, "/hard-delete") || path == "/notes/trash" {
-			handleTrash(w, r, path); return
+			handleTrash(w, r, path)
+			return
 		}
 		handleNotes(w, r, path)
 	case strings.HasPrefix(path, "/share/"):
@@ -151,23 +145,35 @@ func handleAPI(w http.ResponseWriter, r *http.Request) {
 func handleUploads(w http.ResponseWriter, r *http.Request) {
 	filePath := strings.TrimPrefix(r.URL.Path, "/uploads/")
 	if strings.Contains(filePath, "..") || strings.Contains(filePath, "/") || strings.Contains(filePath, "\\") {
-		errResp(w, "invalid path", 400); return
+		errResp(w, "invalid path", 400)
+		return
 	}
 	ext := strings.ToLower(filepath.Ext(filePath))
-	if !allowedUploadExts[ext] { http.NotFound(w, r); return }
+	if !allowedUploadExts[ext] {
+		http.NotFound(w, r)
+		return
+	}
 	fullPath := filepath.Join(uploadsDir(), filePath)
-	if _, err := os.Stat(fullPath); os.IsNotExist(err) { http.NotFound(w, r); return }
+	if _, err := os.Stat(fullPath); os.IsNotExist(err) {
+		http.NotFound(w, r)
+		return
+	}
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	contentType := map[string]string{".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
 		".gif": "image/gif", ".webp": "image/webp", ".ico": "image/x-icon", ".bmp": "image/bmp"}[ext]
-	if contentType != "" { w.Header().Set("Content-Type", contentType) }
+	if contentType != "" {
+		w.Header().Set("Content-Type", contentType)
+	}
 	w.Header().Set("Cache-Control", "public, max-age=604800")
 	http.ServeFile(w, r, fullPath)
 }
 
 func handleGitHubProxy(w http.ResponseWriter, r *http.Request) {
 	path := strings.TrimPrefix(r.URL.Path, "/api/gh/")
-	if path == "" { errResp(w, "missing path", 400); return }
+	if path == "" {
+		errResp(w, "missing path", 400)
+		return
+	}
 	// Optional: use GITHUB_TOKEN env var for higher rate limits
 	token := githubToken
 	ghURL := "https://api.github.com/" + path
@@ -177,7 +183,10 @@ func handleGitHubProxy(w http.ResponseWriter, r *http.Request) {
 		req.Header.Set("Authorization", "Bearer "+token)
 	}
 	resp, err := http.DefaultClient.Do(req)
-	if err != nil { errResp(w, "proxy error", 502); return }
+	if err != nil {
+		errResp(w, "proxy error", 502)
+		return
+	}
 	defer resp.Body.Close()
 	for k, v := range resp.Header {
 		if k == "Content-Type" || k == "Content-Length" {

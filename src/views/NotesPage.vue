@@ -41,7 +41,7 @@ const editorRef = ref<InstanceType<typeof InlineEditor> | null>(null)
 const newNotesCount = ref(0)
 let lastActionAt = 0
 let pollingTimer: ReturnType<typeof setInterval> | null = null
-
+let evtSource: EventSource | null = null
 
 function onNoteSubmitted() {
   lastActionAt = Date.now()
@@ -177,7 +177,7 @@ function handleGlobalKeydown(e: KeyboardEvent) {
 }
 
 function startPolling() {
-  const evtSource = new EventSource('/api/events')
+  evtSource = new EventSource('/api/events')
   evtSource.addEventListener('note', () => {
     if (Date.now() - lastActionAt < 3000) return
     fetch('/api/notes?limit=1&offset=0').then(r => r.json()).then(data => {
@@ -186,6 +186,7 @@ function startPolling() {
       }
     }).catch(() => {})
   })
+  evtSource.onerror = () => { evtSource?.close(); evtSource = null }
   pollingTimer = setInterval(async () => {
     if (Date.now() - lastActionAt < 3000) return
     try {
@@ -201,6 +202,7 @@ function startPolling() {
 }
 
 function stopPolling() {
+  if (evtSource) { evtSource.close(); evtSource = null }
   if (pollingTimer) { clearInterval(pollingTimer); pollingTimer = null }
 }
 

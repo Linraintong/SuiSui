@@ -7,5 +7,8 @@
     "forceConsistentCasingInFileNames": true, "paths": { "@/*": ["./src/*"] },
     "baseUrl": "."
   },
+  "vueCompilerOptions": {
+    "customElements": ["live-video-player", "live-video-skin", "hls-video"]
+  },
   "include": ["src/**/*.ts", "src/**/*.vue"]
 }

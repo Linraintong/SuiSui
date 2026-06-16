@@ -240,7 +240,12 @@ func handleNotes(w http.ResponseWriter, r *http.Request, path string) {
 	default:
 		parts := strings.Split(strings.TrimPrefix(path, "/notes/"), "/")
 		if len(parts) == 1 && r.Method == "PUT" {
-			var body struct{ Content string; Tags []string; UpdatedAt int64; Username string }
+			var body struct {
+				Content   string
+				Tags      []string
+				UpdatedAt int64
+				Username  string
+			}
 			if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 				errResp(w, "无效的请求数据", 400)
 				return
@@ -278,7 +283,7 @@ func handleNotes(w http.ResponseWriter, r *http.Request, path string) {
 				return
 			}
 			sseBroadcast("note", "updated")
-		jsonResp(w, successResponse{Success: "ok"})
+			jsonResp(w, successResponse{Success: "ok"})
 		} else if len(parts) == 1 && r.Method == "DELETE" {
 			username := r.URL.Query().Get("username")
 			if username == "" {
@@ -320,7 +325,7 @@ func handleNotes(w http.ResponseWriter, r *http.Request, path string) {
 				return
 			}
 			sseBroadcast("note", "updated")
-		jsonResp(w, successResponse{Success: "ok"})
+			jsonResp(w, successResponse{Success: "ok"})
 		} else if len(parts) == 2 && parts[1] == "pin" && r.Method == "PATCH" {
 			_, tokenValid := verifyToken(r)
 			if !tokenValid {
@@ -332,7 +337,7 @@ func handleNotes(w http.ResponseWriter, r *http.Request, path string) {
 				return
 			}
 			sseBroadcast("note", "updated")
-		jsonResp(w, successResponse{Success: "ok"})
+			jsonResp(w, successResponse{Success: "ok"})
 		}
 	}
 }
@@ -352,8 +357,12 @@ func handleTrash(w http.ResponseWriter, r *http.Request, path string) {
 		}
 		limit := 50
 		offset := 0
-		if l := r.URL.Query().Get("limit"); l != "" { fmt.Sscanf(l, "%d", &limit) }
-		if o := r.URL.Query().Get("offset"); o != "" { fmt.Sscanf(o, "%d", &offset) }
+		if l := r.URL.Query().Get("limit"); l != "" {
+			fmt.Sscanf(l, "%d", &limit)
+		}
+		if o := r.URL.Query().Get("offset"); o != "" {
+			fmt.Sscanf(o, "%d", &offset)
+		}
 		rows, err := db.Query("SELECT id, content, created_at, updated_at, pinned, tags, username, avatar, nickname, deleted_at FROM trash WHERE username=? ORDER BY deleted_at DESC LIMIT ? OFFSET ?", username, limit, offset)
 		if err != nil {
 			errResp(w, "查询数据时发生错误", 500)

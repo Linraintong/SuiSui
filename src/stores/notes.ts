@@ -162,8 +162,13 @@ export const useNotesStore = defineStore("notes", () => {
     } catch { console.warn("Failed to toggle pin") }
   }
 
+  const pendingReactions = new Set<string>()
+
   async function reactToNote(id: string, emoji: string, uid?: string) {
     if (!uid) uid = useAuthStore().userName || ""
+    const key = `${id}:${emoji}:${uid}`
+    if (pendingReactions.has(key)) return
+    pendingReactions.add(key)
     try {
       const res = await authFetch(`${API}/notes/${id}/react`, {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -178,10 +183,14 @@ export const useNotesStore = defineStore("notes", () => {
         }
       }
     } catch { console.warn("store action failed") }
+    pendingReactions.delete(key)
   }
 
   async function removeReaction(id: string, emoji: string, uid?: string) {
     if (!uid) uid = useAuthStore().userName || ""
+    const key = `${id}:${emoji}:${uid}`
+    if (pendingReactions.has(key)) return
+    pendingReactions.add(key)
     try {
       const res = await authFetch(`${API}/notes/${id}/react`, {
         method: "DELETE", headers: { "Content-Type": "application/json" },
@@ -195,6 +204,7 @@ export const useNotesStore = defineStore("notes", () => {
         }
       }
     } catch { console.warn("store action failed") }
+    pendingReactions.delete(key)
   }
 
   return {

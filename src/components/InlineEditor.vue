@@ -49,7 +49,11 @@ function restoreDraft() {
 function clearDraft() { localStorage.removeItem(DRAFT_KEY) }
 
 let draftTimer: ReturnType<typeof setTimeout> | null = null
-watch([inlineContent, inlineTagsInput, uploadedImages, editingNoteId], () => {
+watch([inlineContent, inlineTagsInput, editingNoteId], () => {
+  if (draftTimer) clearTimeout(draftTimer)
+  draftTimer = setTimeout(saveDraft, 500)
+})
+watch(uploadedImages, () => {
   if (draftTimer) clearTimeout(draftTimer)
   draftTimer = setTimeout(saveDraft, 500)
 }, { deep: true })

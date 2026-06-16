@@ -38,7 +38,7 @@ async function savePassword() {
       body: JSON.stringify({ username: auth.userName, oldPassword: pwdOld.value, newPassword: pwdNew.value })
     })
     const result = await res.json()
-    if (result.error) return
+    if (result.error) { snackMsg.value = result.error; snackbar.value = true; return }
     pwdOld.value = ""; pwdNew.value = ""; pwdConfirm.value = ""; showPwdDialog.value = false
     snackMsg.value = "密码已修改"; snackbar.value = true
   } catch { console.warn("changePassword failed") }

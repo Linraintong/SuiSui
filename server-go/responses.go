@@ -3,12 +3,12 @@ package main
 // --- Auth responses ---
 
 type authLoginResponse struct {
-	Username  string `json:"username"`
-	Avatar    string `json:"avatar"`
-	Nickname  string `json:"nickname"`
-	Role      string `json:"role"`
+	Username   string `json:"username"`
+	Avatar     string `json:"avatar"`
+	Nickname   string `json:"nickname"`
+	Role       string `json:"role"`
 	ThemeColor string `json:"theme_color"`
-	Token     string `json:"token"`
+	Token      string `json:"token"`
 }
 
 type authRegisterResponse struct {
@@ -18,10 +18,10 @@ type authRegisterResponse struct {
 }
 
 type authVerifyResponse struct {
-	Valid     bool   `json:"valid"`
-	Avatar    string `json:"avatar,omitempty"`
-	Nickname  string `json:"nickname,omitempty"`
-	Role      string `json:"role,omitempty"`
+	Valid      bool   `json:"valid"`
+	Avatar     string `json:"avatar,omitempty"`
+	Nickname   string `json:"nickname,omitempty"`
+	Role       string `json:"role,omitempty"`
 	ThemeColor string `json:"theme_color,omitempty"`
 }
 
@@ -79,9 +79,9 @@ type adminUserResponse struct {
 
 type adminUserListResponse struct {
 	Users   []adminUserResponse `json:"users"`
-	Total   int                  `json:"total"`
-	Page    int                  `json:"page"`
-	PerPage int                  `json:"perPage"`
+	Total   int                 `json:"total"`
+	Page    int                 `json:"page"`
+	PerPage int                 `json:"perPage"`
 }
 
 // --- Generic ---

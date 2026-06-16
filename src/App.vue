@@ -49,10 +49,12 @@ async function loadSiteTitle() {
       const s = await r.json()
       if (s.site_title) document.title = s.site_title
       if (s.site_favicon) {
-        const link = document.querySelector("link[rel=\"icon\"]") || document.createElement("link")
-        link.setAttribute("rel", "icon")
-        link.setAttribute("href", s.site_favicon)
-        document.head.appendChild(link)
+        for (const rel of ["icon", "shortcut icon", "apple-touch-icon"]) {
+          let link = document.querySelector(`link[rel="${rel}"]`)
+          if (!link) { link = document.createElement("link"); document.head.appendChild(link) }
+          link.setAttribute("rel", rel)
+          link.setAttribute("href", s.site_favicon)
+        }
       }
     }
   } catch { console.warn("failed silently") }

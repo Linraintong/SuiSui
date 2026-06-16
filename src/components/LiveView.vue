@@ -1,39 +1,52 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted } from "vue"
-import ArtPlayer from "artplayer"
-import Hls from "hls.js"
+import { onMounted, ref } from "vue"
+import "@videojs/html/live-video"
+import "@videojs/html/media/hls-video"
 
-let player: ArtPlayer | null = null
+const streamUrl = ref("")
 
 onMounted(async () => {
-  let url = ""
-  try { url = (await (await fetch("/api/live/config")).json()).streamUrl } catch { /* ignore */ }
-  if (!url) return
-  await new Promise(r => setTimeout(r, 100)) // wait for DOM
-  player = new ArtPlayer({
-    container: "#artplayer-container",
-    url,
-    isLive: true,
-    fullscreen: true,
-    customType: {
-      m3u8(video, url) {
-        const hls = new Hls()
-        hls.loadSource(url)
-        hls.attachMedia(video)
-      },
-    },
-  })
+  try {
+    const res = await fetch("/api/live/config")
+    if (res.ok) {
+      const config = await res.json()
+      streamUrl.value = config.streamUrl ?? ""
+    }
+  } catch { /* ignore */ }
 })
-
-onUnmounted(() => player?.destroy())
 </script>
 
 <template>
-  <div id="artplayer-container" class="live-page" />
+  <live-video-player class="live-page">
+    <live-video-skin>
+      <hls-video :src="streamUrl" playsinline />
+    </live-video-skin>
+  </live-video-player>
 </template>
 
 <style>
-.live-page { width: 100vw; height: 100vh; background: #000; overflow: hidden; }
-.art-video-player { width: 100% !important; height: 100% !important; }
-.art-video-player video { width: 100% !important; height: 100% !important; object-fit: contain !important; }
+.live-page {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* mobile: use dynamic viewport height to exclude browser chrome */
+  height: 100dvh;
+  background: #000;
+  overflow: hidden;
+}
+
+/* Fill viewport — live-video-player has display: contents,
+   so the skin renders as the immediate child of .live-page */
+live-video-player,
+live-video-skin {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+}
+
+/* Reset border-radius on fullscreen player to avoid clipped corners */
+.media-default-skin--video {
+  --media-border-radius: 0 !important;
+}
 </style>

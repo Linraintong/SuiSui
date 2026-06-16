@@ -21,7 +21,7 @@ export const useAuthStore = defineStore("auth", () => {
   const userNickname = ref("")
   const userAppIcon = ref("")
   const userThemeColor = ref("#1976D2")
-const userRole = ref("user")
+  const userRole = ref("user")
   const userToken = ref("")
   const isAdmin = computed(() => userRole.value === "admin")
   const ready = ref(false)
@@ -53,13 +53,8 @@ const userRole = ref("user")
           clearStorage()
         }
       } catch {
-        isLoggedIn.value = true
-        userName.value = storedUser
-        userAvatar.value = localStorage.getItem(AVATAR_KEY) || ""
-        userNickname.value = localStorage.getItem(NICK_KEY) || ""
-        userRole.value = localStorage.getItem("suisui-role") || "user"
-        userThemeColor.value = localStorage.getItem("suisui-color") || "#1976D2"
-        userToken.value = localStorage.getItem(TOKEN_KEY) || ""
+        clearStorage()
+        isLoggedIn.value = false
       }
     }
     ready.value = true

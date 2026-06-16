@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -234,7 +235,7 @@ func TestNotesPagination(t *testing.T) {
 
 	// Create 3 notes
 	for i := 0; i < 3; i++ {
-		body := `{"id":"pnote` + string(rune('0'+i)) + `","content":"Note ` + string(rune('0'+i)) + `","tags":[],"username":"pager","createdAt":1700000000000,"updatedAt":1700000000000}`
+		body := fmt.Sprintf(`{"id":"pnote%d","content":"Note %d","tags":[],"username":"pager","createdAt":1700000000000,"updatedAt":1700000000000}`, i, i)
 		req := httptest.NewRequest("POST", "/api/notes", strings.NewReader(body))
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Authorization", authHeader)

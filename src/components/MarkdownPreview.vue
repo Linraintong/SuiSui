@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from "vue"
 import { marked } from "marked"
+import DOMPurify from "dompurify"
 
 
 const renderer = new marked.Renderer()
@@ -129,7 +130,7 @@ const rendered = computed(() => {
     for (const repo of loadedRepos.value) {
       content = content.replace(new RegExp(`https?://github\\.com/${repo.replace("/", "\\/")}\\b`, "g"), "").trim()
     }
-    let html = marked(highlightText(content, props.searchQuery || ""), { renderer }) as string
+    let html = DOMPurify.sanitize(marked(highlightText(content, props.searchQuery || ""), { renderer }) as string)
     let idx = 0
     html = html.replace(/((?:<p><img[^>]*><\/p>\s*)+)/g, (match) => {
       const images = match.match(/<img[^>]*>/g)

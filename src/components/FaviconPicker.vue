@@ -37,6 +37,13 @@ async function onFileChange(e: Event) {
       link.setAttribute("rel", "icon")
       link.setAttribute("href", data.url)
       document.head.appendChild(link)
+      // also update shortcut icon and apple-touch-icon for mobile browsers
+      for (const rel of ["shortcut icon", "apple-touch-icon"]) {
+        let el = document.querySelector(`link[rel="${rel}"]`)
+        if (!el) { el = document.createElement("link"); document.head.appendChild(el) }
+        el.setAttribute("rel", rel)
+        el.setAttribute("href", data.url)
+      }
       uploadError.value = ""
     } else { uploadError.value = data.error || "上传失败" }
   } catch { uploadError.value = "网络错误，请重试" }

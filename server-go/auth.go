@@ -16,10 +16,10 @@ func handleAuth(w http.ResponseWriter, r *http.Request, path string) {
 			errResp(w, "无效的请求数据", 400)
 			return
 		}
-		// Rate limit: extract client IP
-		ip := r.Header.Get("X-Forwarded-For")
-		if ip == "" {
-			ip = r.RemoteAddr
+		// Rate limit: use RemoteAddr (strip port) to prevent IP spoofing
+		ip := r.RemoteAddr
+		if idx := strings.LastIndex(ip, ":"); idx >= 0 {
+			ip = ip[:idx]
 		}
 		if !checkLoginRateLimit(ip) {
 			errResp(w, "登录尝试过于频繁，请稍后再试", 429)

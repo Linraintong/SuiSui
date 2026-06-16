@@ -57,22 +57,21 @@ func resetLoginRateLimit(ip string) {
 	loginMu.Unlock()
 }
 
-// startLoginRateLimitCleanup runs a background goroutine that periodically
-// purges expired login rate-limit entries to prevent unbounded map growth.
+// startLoginRateLimitCleanup periodically purges expired login rate-limit entries.
+// main() wraps this in a goroutine, so no extra go is needed here.
 func startLoginRateLimitCleanup() {
-	go func() {
-		for {
-			time.Sleep(5 * time.Minute)
-			loginMu.Lock()
-			now := time.Now()
-			for ip, entry := range loginAttempts {
-				if now.Sub(entry.lastTime) > 1*time.Minute {
-					delete(loginAttempts, ip)
-				}
+	ticker := time.NewTicker(5 * time.Minute)
+	defer ticker.Stop()
+	for range ticker.C {
+		loginMu.Lock()
+		now := time.Now()
+		for ip, entry := range loginAttempts {
+			if now.Sub(entry.lastTime) > 1*time.Minute {
+				delete(loginAttempts, ip)
 			}
-			loginMu.Unlock()
 		}
-	}()
+		loginMu.Unlock()
+	}
 }
 
 var db *sql.DB
@@ -190,7 +189,7 @@ const (
 	argonThreads = 4
 	argonKeyLen  = 32
 	// Fallback HMAC iteration count for version 1 hashes
-	hashIterations = 200000
+	hashIterations       = 200000
 	legacyHashIterations = 10000
 )
 

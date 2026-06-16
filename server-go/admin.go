@@ -129,10 +129,6 @@ func handleAdmin(w http.ResponseWriter, r *http.Request, path string) {
 		}
 		jsonResp(w, adminUserListResponse{Users: userList, Total: total, Page: page, PerPage: perPage})
 
-
-
-
-
 	default:
 		parts := strings.Split(strings.TrimPrefix(path, "/admin/users/"), "/")
 		_, ok := requireAdmin(r)
