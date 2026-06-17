@@ -27,18 +27,13 @@ onMounted(async () => {
 </template>
 
 <style>
-html, body {
-  margin: 0 !important;
-  padding: 0 !important;
-  height: 100% !important;
-  overflow: hidden !important;
-}
 .live-page {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
+  overflow: hidden;
   background: #000;
   --media-border-radius: 0;
 }
