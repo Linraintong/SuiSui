@@ -37,18 +37,25 @@ onMounted(async () => {
   background: #000;
   --media-border-radius: 0;
 }
+/* live-video-player 默认 display:contents 不产生盒子，
+   改为 block + 尺寸使其撑满容器，为内部 skin 提供布局上下文 */
+live-video-player {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 live-video-skin {
   width: 100% !important;
   height: 100% !important;
 }
-/* 覆盖 hls-video 默认的 display:contents，
-   改为绝对定位使其脱离布局流、填满视口 */
+
+/* hls-video 是自定义元素，库内 ::slotted(video) 匹配不到它，
+   所以需要显式约束尺寸让视频正常留存在流中，不撑大容器 */
 .live-page hls-video {
   display: block !important;
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
   width: 100% !important;
   height: 100% !important;
+  object-fit: contain !important;
 }
 </style>
