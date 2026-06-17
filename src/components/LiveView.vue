@@ -19,7 +19,9 @@ onMounted(async () => {
 watch(streamUrl, (url) => {
   const video = videoRef.value
   if (!video || !url) return
+  // Don't set src on the video element — HLS.js handles it or native
   if (Hls.isSupported()) {
+    video.removeAttribute("src")
     const hls = new Hls()
     hls.loadSource(url)
     hls.attachMedia(video)
@@ -33,7 +35,7 @@ watch(streamUrl, (url) => {
   <div class="live-page">
     <live-video-player>
       <live-video-skin>
-        <video ref="videoRef" :src="streamUrl" playsinline />
+        <video ref="videoRef" playsinline />
       </live-video-skin>
     </live-video-player>
   </div>
@@ -53,20 +55,15 @@ html, body {
   overflow: hidden;
   --media-border-radius: 0;
 }
-
-/* Force everything to exactly viewport size */
-.live-page,
 live-video-player,
 live-video-skin {
   width: 100vw !important;
   height: 100vh !important;
 }
-
-/* Video fills its container exactly, no overflow */
 .live-page video {
   display: block !important;
-  width: 100% !important;
-  height: 100% !important;
+  width: 100vw !important;
+  height: 100vh !important;
   object-fit: contain !important;
 }
 </style>
