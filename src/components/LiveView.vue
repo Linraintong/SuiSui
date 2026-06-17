@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue"
+import { onMounted, ref, watch } from "vue"
 import "@videojs/html/live-video"
 import Hls from "hls.js"
 
@@ -16,9 +16,6 @@ onMounted(async () => {
   } catch { /* ignore */ }
 })
 
-// Use hls.js when the stream URL changes
-import { watch } from "vue"
-
 watch(streamUrl, (url) => {
   const video = videoRef.value
   if (!video || !url) return
@@ -27,18 +24,19 @@ watch(streamUrl, (url) => {
     hls.loadSource(url)
     hls.attachMedia(video)
   } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-    // Native HLS (Safari)
     video.src = url
   }
 })
 </script>
 
 <template>
-  <live-video-player class="live-page">
-    <live-video-skin>
-      <video ref="videoRef" :src="streamUrl" playsinline />
-    </live-video-skin>
-  </live-video-player>
+  <div class="live-page">
+    <live-video-player>
+      <live-video-skin>
+        <video ref="videoRef" :src="streamUrl" playsinline />
+      </live-video-skin>
+    </live-video-player>
+  </div>
 </template>
 
 <style>
@@ -51,19 +49,12 @@ html, body {
 
 .live-page {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  height: -webkit-fill-available;
+  inset: 0;
   background: #000;
   overflow: hidden;
-  z-index: 9999;
 }
 
-/* Override display:contents so the player creates its own box */
 live-video-player {
-  display: block !important;
   width: 100% !important;
   height: 100% !important;
 }
