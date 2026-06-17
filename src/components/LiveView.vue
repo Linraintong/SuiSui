@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from "vue"
+import { onMounted, onUnmounted, ref, watch, nextTick } from "vue"
 import "@videojs/html/live-video"
 import Hls from "hls.js"
 
@@ -16,19 +16,36 @@ onMounted(async () => {
   } catch { /* ignore */ }
 })
 
+function fitVideo() {
+  const video = videoRef.value
+  if (!video) return
+  video.style.width = "100vw"
+  video.style.height = "100vh"
+}
+
 watch(streamUrl, (url) => {
   const video = videoRef.value
   if (!video || !url) return
-  // Don't set src on the video element — HLS.js handles it or native
+  video.removeAttribute("src")
   if (Hls.isSupported()) {
-    video.removeAttribute("src")
     const hls = new Hls()
+    hls.on(Hls.Events.MANIFEST_PARSED, fitVideo)
     hls.loadSource(url)
     hls.attachMedia(video)
   } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
     video.src = url
+    video.oncanplay = fitVideo
   }
 })
+
+// Force video to viewport size, re-apply on any resize
+let ro: ResizeObserver | null = null
+onMounted(() => {
+  nextTick(fitVideo)
+  ro = new ResizeObserver(fitVideo)
+  ro.observe(document.documentElement)
+})
+onUnmounted(() => ro?.disconnect())
 </script>
 
 <template>
@@ -50,20 +67,21 @@ html, body {
 }
 .live-page {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: #000;
-  overflow: hidden;
   --media-border-radius: 0;
 }
-live-video-player,
+.live-page,
 live-video-skin {
-  width: 100vw !important;
-  height: 100vh !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 .live-page video {
-  display: block !important;
-  width: 100vw !important;
-  height: 100vh !important;
+  width: 100% !important;
+  height: 100% !important;
   object-fit: contain !important;
 }
 </style>
