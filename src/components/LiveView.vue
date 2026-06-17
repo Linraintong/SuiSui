@@ -25,31 +25,44 @@ onMounted(async () => {
 </template>
 
 <style>
-.live-page {
-  position: fixed;
-  inset: 0;
-  background: #000;
-  overflow: hidden;
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 100% !important;
+  overflow: hidden !important;
 }
 
-/* Fill viewport — live-video-player has display: contents,
-   so the skin renders as a direct child of .live-page */
+.live-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  height: -webkit-fill-available;
+  background: #000;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+/* Override display:contents so the player creates its own box */
+live-video-player {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
 live-video-skin {
   width: 100% !important;
   height: 100% !important;
 }
 
-/* hls-video is a custom element, NOT a native <video>,
-   so the skin's internal ::slotted(video) selector doesn't match it.
-   We must apply these styles explicitly. */
 hls-video {
+  display: block !important;
   width: 100% !important;
   height: 100% !important;
   object-fit: contain !important;
-  display: block !important;
 }
 
-/* Reset border-radius on fullscreen player */
 .media-default-skin--video {
   --media-border-radius: 0 !important;
 }
