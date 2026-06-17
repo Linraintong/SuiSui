@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch, nextTick } from "vue"
+import { onMounted, ref, watch } from "vue"
 import "@videojs/html/live-video"
 import Hls from "hls.js"
 
@@ -16,36 +16,18 @@ onMounted(async () => {
   } catch { /* ignore */ }
 })
 
-function fitVideo() {
-  const video = videoRef.value
-  if (!video) return
-  video.style.width = "100vw"
-  video.style.height = "100vh"
-}
-
 watch(streamUrl, (url) => {
   const video = videoRef.value
   if (!video || !url) return
   video.removeAttribute("src")
   if (Hls.isSupported()) {
     const hls = new Hls()
-    hls.on(Hls.Events.MANIFEST_PARSED, fitVideo)
     hls.loadSource(url)
     hls.attachMedia(video)
   } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
     video.src = url
-    video.oncanplay = fitVideo
   }
 })
-
-// Force video to viewport size, re-apply on any resize
-let ro: ResizeObserver | null = null
-onMounted(() => {
-  nextTick(fitVideo)
-  ro = new ResizeObserver(fitVideo)
-  ro.observe(document.documentElement)
-})
-onUnmounted(() => ro?.disconnect())
 </script>
 
 <template>
@@ -74,12 +56,17 @@ html, body {
   background: #000;
   --media-border-radius: 0;
 }
-.live-page,
 live-video-skin {
   width: 100% !important;
   height: 100% !important;
 }
+
+/* 绝对定位视频，完全脱离布局流，
+   其原生分辨率再也不会撑大容器 */
 .live-page video {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
   width: 100% !important;
   height: 100% !important;
   object-fit: contain !important;
