@@ -5,7 +5,15 @@ import { fileURLToPath } from 'url'
 import viteCompression from 'vite-plugin-compression'
 
 export default defineConfig({
-  plugins: [Vue({ template: { transformAssetUrls } }), Vuetify({ autoImport: true }), viteCompression({ algorithm: 'gzip' }), viteCompression({ algorithm: 'brotliCompress' })],
+  plugins: [Vue({
+    template: {
+      transformAssetUrls,
+      compilerOptions: {
+        isCustomElement: (tag: string) =>
+          tag.startsWith('live-video-') || tag === 'hls-video',
+      },
+    },
+  }), Vuetify({ autoImport: true }), viteCompression({ algorithm: 'gzip' }), viteCompression({ algorithm: 'brotliCompress' })],
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
   server: { port: 3000, proxy: { "/api": process.env.VITE_API_PROXY || "http://localhost:3742", "/uploads": process.env.VITE_API_PROXY || "http://localhost:3742" } },
   build: {
