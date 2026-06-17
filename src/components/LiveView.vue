@@ -46,25 +46,27 @@ html, body {
   height: 100% !important;
   overflow: hidden !important;
 }
-
 .live-page {
   position: fixed;
   inset: 0;
   background: #000;
   overflow: hidden;
+  --media-border-radius: 0;
 }
 
-live-video-player {
-  width: 100% !important;
-  height: 100% !important;
-}
-
+/* Force everything to exactly viewport size */
+.live-page,
+live-video-player,
 live-video-skin {
-  width: 100% !important;
-  height: 100% !important;
+  width: 100vw !important;
+  height: 100vh !important;
 }
 
-.media-default-skin--video {
-  --media-border-radius: 0 !important;
+/* Video fills its container exactly, no overflow */
+.live-page video {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
 }
 </style>
