@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from "vue"
+import { onMounted, ref } from "vue"
 import "@videojs/html/live-video"
-import Hls from "hls.js"
+import "@videojs/html/media/hls-video"
 
 const streamUrl = ref("")
-const videoRef = ref<HTMLVideoElement | null>(null)
 
 onMounted(async () => {
   try {
@@ -15,26 +14,13 @@ onMounted(async () => {
     }
   } catch { /* ignore */ }
 })
-
-watch(streamUrl, (url) => {
-  const video = videoRef.value
-  if (!video || !url) return
-  video.removeAttribute("src")
-  if (Hls.isSupported()) {
-    const hls = new Hls()
-    hls.loadSource(url)
-    hls.attachMedia(video)
-  } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-    video.src = url
-  }
-})
 </script>
 
 <template>
   <div class="live-page">
     <live-video-player>
       <live-video-skin>
-        <video ref="videoRef" playsinline />
+        <hls-video :src="streamUrl" playsinline />
       </live-video-skin>
     </live-video-player>
   </div>
@@ -60,15 +46,14 @@ live-video-skin {
   width: 100% !important;
   height: 100% !important;
 }
-
-/* 绝对定位视频，完全脱离布局流，
-   其原生分辨率再也不会撑大容器 */
-.live-page video {
+/* 覆盖 hls-video 默认的 display:contents，
+   改为绝对定位使其脱离布局流、填满视口 */
+.live-page hls-video {
+  display: block !important;
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
   width: 100% !important;
   height: 100% !important;
-  object-fit: contain !important;
 }
 </style>
