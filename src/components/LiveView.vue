@@ -28,22 +28,28 @@ onMounted(async () => {
 .live-page {
   position: fixed;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  /* mobile: use dynamic viewport height to exclude browser chrome */
-  height: 100dvh;
   background: #000;
   overflow: hidden;
 }
 
 /* Fill viewport — live-video-player has display: contents,
-   so the skin needs explicit height to fill the page */
+   so the skin renders as a direct child of .live-page */
 live-video-skin {
   width: 100% !important;
   height: 100% !important;
 }
 
-/* Reset border-radius on fullscreen player to avoid clipped corners */
+/* hls-video is a custom element, NOT a native <video>,
+   so the skin's internal ::slotted(video) selector doesn't match it.
+   We must apply these styles explicitly. */
+hls-video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+
+/* Reset border-radius on fullscreen player */
 .media-default-skin--video {
   --media-border-radius: 0 !important;
 }
