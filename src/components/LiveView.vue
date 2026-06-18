@@ -28,6 +28,8 @@ onMounted(async () => {
     clearInterval(waitForVideo)
     video.setAttribute("controls", "")
     video.setAttribute("playsinline", "")
+    video.setAttribute("autoplay", "")
+    video.muted = true
   }, 200)
 })
 </script>
@@ -36,7 +38,7 @@ onMounted(async () => {
   <div class="live-page">
     <live-video-player>
       <live-video-skin>
-        <hls-video :src="streamUrl" playsinline />
+        <hls-video :src="streamUrl" playsinline autoplay muted />
       </live-video-skin>
     </live-video-player>
   </div>
