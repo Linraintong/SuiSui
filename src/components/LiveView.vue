@@ -4,12 +4,8 @@ import "@videojs/html/live-video"
 import "@videojs/html/media/hls-video"
 
 const streamUrl = ref("")
-const isTouch = ref(false)
 
 onMounted(async () => {
-  // 检测触摸设备
-  isTouch.value = "ontouchstart" in window || navigator.maxTouchPoints > 0
-
   // 加载直播流地址
   try {
     const res = await fetch("/api/live/config")
@@ -19,29 +15,19 @@ onMounted(async () => {
     }
   } catch { /* ignore */ }
 
-  if (!isTouch.value) return
+  // ── 触摸设备：直接给原生 <video> 加上 controls ────────────
+  // hls-video 内部通过 open shadow DOM 投影了一个原生 <video>，
+  // 触摸设备的浏览器会拦截 pointer 事件让皮肤手势系统失效，
+  // 这里直接启用浏览器原生控件作为可靠回退。
+  if (!("ontouchstart" in window || navigator.maxTouchPoints > 0)) return
 
-  // ── 触摸设备：绕过被 <video> 拦截的指针事件 ──────────────────────
-  // 手势系统在 media-container 上监听 pointerdown/pointerup，
-  // 但 hls-video（继承 HTMLVideoElement）在手机上会拦截这些事件。
-  // 这里直接通过 Shadow DOM 强制显示控件，并用手势 touch 事件替代。
-  const waitForPlayer = setInterval(() => {
-    const skin = document.querySelector("live-video-skin")
-    const root = skin?.shadowRoot
-    if (!root) return
-    clearInterval(waitForPlayer)
-
-    const container = root.querySelector("media-container")
-    if (!container) return
-
-    // 始终显示控件（用户可直接点击按钮）
-    container.setAttribute("data-visible", "")
-
-    // 点击画面时切换控件显隐
-    const livePage = document.querySelector(".live-page")
-    livePage?.addEventListener("touchend", () => {
-      container.toggleAttribute("data-visible")
-    }, { passive: true })
+  const waitForVideo = setInterval(() => {
+    const hls = document.querySelector("hls-video")
+    const video = hls?.shadowRoot?.querySelector("video")
+    if (!video) return
+    clearInterval(waitForVideo)
+    video.setAttribute("controls", "")
+    video.setAttribute("playsinline", "")
   }, 200)
 })
 </script>
