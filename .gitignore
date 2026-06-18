@@ -21,3 +21,4 @@ server-go/*.exe
 reasonix.toml
 *_gh_resp.json
 suisui-root.pem
+.playwright-mcp/
