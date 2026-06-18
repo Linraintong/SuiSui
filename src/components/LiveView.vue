@@ -4,8 +4,13 @@ import "@videojs/html/live-video"
 import "@videojs/html/media/hls-video"
 
 const streamUrl = ref("")
+const isTouch = ref(false)
 
 onMounted(async () => {
+  // 检测触摸设备
+  isTouch.value = "ontouchstart" in window || navigator.maxTouchPoints > 0
+
+  // 加载直播流地址
   try {
     const res = await fetch("/api/live/config")
     if (res.ok) {
@@ -13,6 +18,31 @@ onMounted(async () => {
       streamUrl.value = config.streamUrl ?? ""
     }
   } catch { /* ignore */ }
+
+  if (!isTouch.value) return
+
+  // ── 触摸设备：绕过被 <video> 拦截的指针事件 ──────────────────────
+  // 手势系统在 media-container 上监听 pointerdown/pointerup，
+  // 但 hls-video（继承 HTMLVideoElement）在手机上会拦截这些事件。
+  // 这里直接通过 Shadow DOM 强制显示控件，并用手势 touch 事件替代。
+  const waitForPlayer = setInterval(() => {
+    const skin = document.querySelector("live-video-skin")
+    const root = skin?.shadowRoot
+    if (!root) return
+    clearInterval(waitForPlayer)
+
+    const container = root.querySelector("media-container")
+    if (!container) return
+
+    // 始终显示控件（用户可直接点击按钮）
+    container.setAttribute("data-visible", "")
+
+    // 点击画面时切换控件显隐
+    const livePage = document.querySelector(".live-page")
+    livePage?.addEventListener("touchend", () => {
+      container.toggleAttribute("data-visible")
+    }, { passive: true })
+  }, 200)
 })
 </script>
 
