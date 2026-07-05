@@ -170,10 +170,6 @@ func handleUploads(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleGitHubProxy(w http.ResponseWriter, r *http.Request) {
-	if _, ok := requireRole(r, ""); !ok {
-		errResp(w, "unauthorized", 401)
-		return
-	}
 	path := strings.TrimPrefix(r.URL.Path, "/api/gh/")
 	if path == "" {
 		errResp(w, "missing path", 400)
