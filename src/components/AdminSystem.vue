@@ -203,9 +203,8 @@ loadSettings()
           <v-btn variant="tonal" color="primary" size="small" class="rounded-pill" @click="siteIcp = icpInput; saveSiteIcp()">保存</v-btn>
         </div>
       </v-card>
-    </v-dialog>
-
-  </div>
+</v-dialog>
+</div>
 </template>
 
 <style scoped>

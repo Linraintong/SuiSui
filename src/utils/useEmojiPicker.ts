@@ -13,7 +13,7 @@ async function loadEmojiDataOnce(): Promise<void> {
   if (loadingPromise) return loadingPromise
 
   loadingPromise = (async () => {
-    const raw = (await import("emojibase-data/zh/compact.json")).default as any[]
+    const raw = (await import("emojibase-data/zh/compact.json")).default as { group?: number; unicode?: string }[]
     const cats = [0, 1, 3, 4, 5, 6, 7, 8, 9].map((g) => ({
       id: g,
       icon: groupLabels[g] || "?",

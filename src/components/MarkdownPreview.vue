@@ -5,8 +5,6 @@ import DOMPurify from "dompurify"
 import { API_BASE_URL } from "@/utils/api"
 
 
-const renderer = new marked.Renderer()
-
 marked.setOptions({ breaks: true, gfm: true })
 
 const emit = defineEmits<{ "todo-toggle": [idx: number] }>()
@@ -106,20 +104,21 @@ function highlightText(text: string, query: string): string {
 }
 
 const rendered = computed(() => {
-  let todoIndex = 0
-  let codeBlockIndex = 0
-  renderer.code = ({ text, lang: _lang }) => {
+  let localTodoIdx = 0
+  let localCodeBlockIdx = 0
+  const tmpRenderer = new marked.Renderer()
+  tmpRenderer.code = ({ text, lang: _lang }) => {
     const escaped = text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
     const encoded = encodeURIComponent(text)
-    const idx = codeBlockIndex++
+    const idx = localCodeBlockIdx++
     return `<div class="code-block">
       <pre><code>${escaped}</code></pre>
       <button class="code-copy-btn" data-code="${encoded}" data-copy-idx="${idx}" title="复制代码"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
     </div>`
   }
-  renderer.listitem = ({ text, task, checked }) => {
+  tmpRenderer.listitem = ({ text, task, checked }) => {
     if (task) {
-      const idx = todoIndex++
+      const idx = localTodoIdx++
       const checkedAttr = checked ? ' checked' : ''
       return `<li class="todo-item"><label class="todo-label"><input type="checkbox" class="todo-checkbox" data-todo-idx="${idx}"${checkedAttr}><span class="todo-checkmark"></span><span class="todo-text${checked ? ' done' : ''}">${text}</span></label></li>`
     }
@@ -133,7 +132,7 @@ const rendered = computed(() => {
     for (const repo of loadedRepos.value) {
       content = content.replace(new RegExp(`https?://github\\.com/${repo.replace("/", "\\/")}\\b`, "g"), "").trim()
     }
-    let html = DOMPurify.sanitize(marked(highlightText(content, props.searchQuery || ""), { renderer }) as string)
+    let html = DOMPurify.sanitize(marked(highlightText(content, props.searchQuery || ""), { renderer: tmpRenderer }) as string)
     let idx = 0
     html = html.replace(/((?:<p><img[^>]*><\/p>\s*)+)/g, (match) => {
       const images = match.match(/<img[^>]*>/g)

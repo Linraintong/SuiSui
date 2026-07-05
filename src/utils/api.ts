@@ -3,7 +3,7 @@ import { useAuthStore } from "@/stores/auth"
 const TOKEN_KEY = "suisui-token"
 
 /** Base URL for API requests. Override via VITE_API_BASE at build time. */
-export const API_BASE_URL = (import.meta as Record<string, any>).env?.VITE_API_BASE ?? ""
+export const API_BASE_URL = (import.meta as Record<string, unknown>).env?.VITE_API_BASE ?? ""
 
 function getToken(): string {
   try {

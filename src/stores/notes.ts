@@ -1,7 +1,7 @@
 import { defineStore } from "pinia"
 import { ref, computed } from "vue"
 import { useAuthStore } from "@/stores/auth"
-import { authFetch, API_BASE_URL } from "@/utils/api"
+import { authFetch } from "@/utils/api"
 const PAGE_SIZE = 20
 
 export interface NoteReaction { [emoji: string]: string[] }

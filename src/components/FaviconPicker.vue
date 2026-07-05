@@ -1,6 +1,6 @@
 ﻿<script setup lang="ts">
 import { ref, computed } from "vue"
-import { authFetch, API_BASE_URL } from "@/utils/api"
+import { authFetch } from "@/utils/api"
 defineProps<{ modelValue: boolean }>()
 const emit = defineEmits<{ "update:modelValue": [value: boolean] }>()
 const uploading = ref(false)

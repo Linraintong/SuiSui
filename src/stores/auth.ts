@@ -1,7 +1,7 @@
 ﻿import { ref, computed } from "vue"
 import { defineStore } from "pinia"
 
-import { authFetch, API_BASE_URL, authFetchJSON } from "@/utils/api"
+import { authFetch, API_BASE_URL } from "@/utils/api"
 const AUTH_KEY = "suisui-auth"
 const USER_KEY = "suisui-user"
 const AVATAR_KEY = "suisui-avatar"

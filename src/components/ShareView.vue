@@ -114,7 +114,7 @@ async function toggleReaction(emoji: string) {
           </v-chip>
         </div>
         <div class="reactions-row mt-1">
-          <template v-for="(users, emoji, ri) in note.reactions || {}" :key="emoji">
+          <template v-for="(users, emoji) in note.reactions || {}" :key="emoji">
             <v-chip v-if="users && users.length" size="x-small" variant="tonal"
               :class="['reaction-chip', { active: hasReacted(emoji) }]"
               @click="toggleReaction(emoji)">

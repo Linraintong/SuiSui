@@ -2,7 +2,7 @@
 import { ref, onMounted, watch } from "vue"
 import { useRouter } from "vue-router"
 import { useAuthStore } from "@/stores/auth"
-import { authFetch, API_BASE_URL } from "@/utils/api"
+import { authFetch } from "@/utils/api"
 import AdminProfile from "@/components/AdminProfile.vue"
 import AdminSystem from "@/components/AdminSystem.vue"
 
@@ -106,7 +106,6 @@ function formatDate(ts: number) { return new Date(ts).toLocaleString("zh-CN") }
 
     <Transition name="fade" mode="out-in">
       <div :key="tab" class="tab-content">
-
         <!-- === Overview Tab === -->
         <template v-if="tab === 'overview' && auth.isAdmin">
           <div class="stats-grid">
@@ -190,9 +189,8 @@ function formatDate(ts: number) { return new Date(ts).toLocaleString("zh-CN") }
         <!-- === Profile Tab === -->
         <template v-if="tab === 'profile'">
           <AdminProfile />
-        </template>
-
-      </div>
+</template>
+</div>
     </Transition>
 
     <v-dialog v-model="showDeleteDialog" max-width="380">
@@ -206,7 +204,7 @@ function formatDate(ts: number) { return new Date(ts).toLocaleString("zh-CN") }
         <p class="text-body-2 mb-4 text-medium-emphasis">确定要删除此用户吗？此操作不可撤销，该用户的所有笔记也将被删除。</p>
         <div class="d-flex justify-end ga-2">
           <v-btn variant="text" size="small" @click="showDeleteDialog = false">取消</v-btn>
-          <v-btn color="error" variant="flat" size="small" :loading="deleting !== null" @click="doDelete" class="rounded-pill">确认删除</v-btn>
+          <v-btn color="error" variant="flat" size="small" :loading="deleting !== null" class="rounded-pill" @click="doDelete">确认删除</v-btn>
         </div>
       </v-card>
     </v-dialog>
