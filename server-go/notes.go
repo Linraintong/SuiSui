@@ -64,11 +64,8 @@ func handleNotes(w http.ResponseWriter, r *http.Request, path string) {
 			}
 		}
 
-		// Use token-based username if authenticated, fall back to query param
+		// Use query param to filter by username; empty = show all notes
 		username := q.Get("username")
-		if requester, ok := requireRole(r, ""); ok {
-			username = requester
-		}
 		params := map[string]string{
 			"search":   q.Get("search"),
 			"tag":      q.Get("tag"),
