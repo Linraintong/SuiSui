@@ -1,4 +1,4 @@
-﻿import { defineConfig } from 'vite'
+import { defineConfig } from 'vite'
 import Vue from '@vitejs/plugin-vue'
 import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import { fileURLToPath } from 'url'
@@ -8,7 +8,6 @@ export default defineConfig({
   plugins: [Vue({
     template: {
       transformAssetUrls,
-
     },
   }), Vuetify({ autoImport: true }), viteCompression({ algorithm: 'gzip' }), viteCompression({ algorithm: 'brotliCompress' })],
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
@@ -16,12 +15,15 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          vuetify: ["vuetify"],
-          marked: ["marked"],
+        manualChunks(id) {
+          if (id.includes("node_modules/vuetify")) return "vuetify"
+          if (id.includes("node_modules/marked")) return "marked"
+          if (id.includes("node_modules/highlight.js")) return "highlight"
+          if (id.includes("node_modules/emojibase-data")) return "emoji"
+          if (id.includes("node_modules/vue") || id.includes("node_modules/pinia") || id.includes("node_modules/dompurify") || id.includes("node_modules/vue-router")) return "vendor"
         },
       },
     },
-    chunkSizeWarningLimit: 400,
+    chunkSizeWarningLimit: 600,
   },
 })
