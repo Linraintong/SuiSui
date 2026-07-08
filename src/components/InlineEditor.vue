@@ -197,32 +197,32 @@ defineExpose({ handleEdit })
   <div v-if="auth.isLoggedIn" class="inline-editor mb-4">
     <div class="editor-box" @drop.prevent="onInlineDrop" @dragover.prevent>
       <div class="md-toolbar">
-        <v-btn icon="mdi-format-bold" size="small" variant="text" class="tool-btn" title="粗体 (Ctrl+B)" @click="insertBold" />
-        <v-btn icon="mdi-format-italic" size="small" variant="text" class="tool-btn" title="斜体 (Ctrl+I)" @click="insertItalic" />
+        <v-btn icon="mdi-format-bold" size="small" variant="text" class="tool-btn" title="粗体 (Ctrl+B)" aria-label="粗体" @click="insertBold" />
+        <v-btn icon="mdi-format-italic" size="small" variant="text" class="tool-btn" title="斜体 (Ctrl+I)" aria-label="斜体" @click="insertItalic" />
         <span class="tool-sep" />
-        <v-btn icon="mdi-format-header-pound" size="small" variant="text" class="tool-btn" title="标题" @click="insertHeading" />
-        <v-btn icon="mdi-code-tags" size="small" variant="text" class="tool-btn" title="代码" @click="insertCode" />
-        <v-btn icon="mdi-link-variant" size="small" variant="text" class="tool-btn" title="链接" @click="insertLink" />
+        <v-btn icon="mdi-format-header-pound" size="small" variant="text" class="tool-btn" title="标题" aria-label="标题" @click="insertHeading" />
+        <v-btn icon="mdi-code-tags" size="small" variant="text" class="tool-btn" title="代码" aria-label="代码" @click="insertCode" />
+        <v-btn icon="mdi-link-variant" size="small" variant="text" class="tool-btn" title="链接" aria-label="链接" @click="insertLink" />
         <span class="tool-sep" />
-        <v-btn icon="mdi-format-list-bulleted" size="small" variant="text" class="tool-btn" title="列表" @click="insertList" />
-        <v-btn icon="mdi-format-list-numbered" size="small" variant="text" class="tool-btn" title="有序列表" @click="insertOrderedList" />
+        <v-btn icon="mdi-format-list-bulleted" size="small" variant="text" class="tool-btn" title="列表" aria-label="列表" @click="insertList" />
+        <v-btn icon="mdi-format-list-numbered" size="small" variant="text" class="tool-btn" title="有序列表" aria-label="有序列表" @click="insertOrderedList" />
         <span class="tool-sep" />
-        <v-btn icon="mdi-format-quote-open" size="small" variant="text" class="tool-btn" title="引用" @click="insertQuote" />
-        <v-btn icon="mdi-format-strikethrough-variant" size="small" variant="text" class="tool-btn" title="删除线" @click="insertStrikethrough" />
-        <v-btn icon="mdi-format-list-checks" size="small" variant="text" class="tool-btn" title="待办" @click="insertTodo" />
+        <v-btn icon="mdi-format-quote-open" size="small" variant="text" class="tool-btn" title="引用" aria-label="引用" @click="insertQuote" />
+        <v-btn icon="mdi-format-strikethrough-variant" size="small" variant="text" class="tool-btn" title="删除线" aria-label="删除线" @click="insertStrikethrough" />
+        <v-btn icon="mdi-format-list-checks" size="small" variant="text" class="tool-btn" title="待办" aria-label="待办" @click="insertTodo" />
         <span class="tool-sep" />
-        <v-btn icon="mdi-code-braces" size="small" variant="text" class="tool-btn" title="代码块" @click="insertCodeBlock" />
-        <v-btn icon="mdi-table" size="small" variant="text" class="tool-btn" title="表格" @click="insertTable" />
-        <v-btn icon="mdi-minus" size="small" variant="text" class="tool-btn" title="分隔线" @click="insertHr" />
+        <v-btn icon="mdi-code-braces" size="small" variant="text" class="tool-btn" title="代码块" aria-label="代码块" @click="insertCodeBlock" />
+        <v-btn icon="mdi-table" size="small" variant="text" class="tool-btn" title="表格" aria-label="表格" @click="insertTable" />
+        <v-btn icon="mdi-minus" size="small" variant="text" class="tool-btn" title="分隔线" aria-label="分隔线" @click="insertHr" />
         <span class="tool-sep" />
         <v-btn :icon="previewMode ? 'mdi-pencil' : 'mdi-eye-outline'" size="small" variant="text"
           class="tool-btn" :class="{ 'preview-active': previewMode }"
-          :title="previewMode ? '编辑' : '预览'" @click="togglePreview" />
+          :title="previewMode ? '编辑' : '预览'" aria-label="预览" @click="togglePreview" />
       </div>
 
       <!-- Edit mode -->
       <textarea v-if="!previewMode" ref="inlineTextarea" v-model="inlineContent" class="inline-textarea"
-        placeholder="写点什么呢.." rows="1" @keydown="onInlineKeydown" @paste="onInlinePaste" @input="autoGrowTextarea"></textarea>
+        placeholder="写点什么呢…" rows="1" @keydown="onInlineKeydown" @paste="onInlinePaste" @input="autoGrowTextarea"></textarea>
 
       <!-- Preview mode -->
       <div v-else class="preview-area">
@@ -241,9 +241,9 @@ defineExpose({ handleEdit })
       </div>
       <div class="editor-toolbar">
         <div class="d-flex align-center ga-1">
-          <v-btn icon="mdi-image-plus" size="small" variant="text" class="tool-btn" :loading="inlineUploading" @click="triggerInlineUpload" />
+          <v-btn icon="mdi-image-plus" size="small" variant="text" class="tool-btn" aria-label="上传图片" :loading="inlineUploading" @click="triggerInlineUpload" />
           <input ref="inlineFileInput" type="file" accept="image/*" multiple hidden @change="onInlineUpload" />
-          <v-btn icon="mdi-delete-outline" size="small" variant="text" class="tool-btn" @click="$emit('open-trash')" />
+          <v-btn icon="mdi-delete-outline" size="small" variant="text" class="tool-btn" aria-label="回收站" @click="$emit('open-trash')" />
         </div>
         <v-btn color="primary" size="small" variant="flat" class="rounded-pill submit-btn" @click="submitInline">
           <v-icon start>mdi-send</v-icon>{{ editingNoteId ? "更新" : "发布" }}
@@ -280,7 +280,7 @@ defineExpose({ handleEdit })
   background: rgba(var(--v-theme-surface), 0.55);
   backdrop-filter: blur(8px);
 }
-.editor-box:focus-within { border-color: rgba(var(--v-theme-primary), 0.3); box-shadow: 0 2px 16px rgba(var(--v-theme-primary), 0.08); }
+.editor-box:focus-within { border-color: rgba(var(--v-theme-primary), 0.3); }
 .inline-textarea {
   width: 100%; border: none; outline: none; resize: none;
   padding: 14px 16px 8px; font-size: 0.95rem; line-height: 1.7;

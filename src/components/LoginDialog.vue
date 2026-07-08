@@ -63,13 +63,13 @@ function resetForm() {
       <v-card-text class="pa-4">
         <v-alert v-if="loginError" :text="loginError" type="error" variant="tonal" density="compact" closable class="mb-4 rounded-lg" @click:close="loginError = ''" />
         <v-form @submit.prevent="handleAuth">
-          <v-text-field v-model="loginUsername" label="用户名" variant="outlined" density="comfortable" hide-details class="mb-3" prepend-inner-icon="mdi-account-outline" />
-          <v-text-field v-model="loginPassword" :type="showPwd ? 'text' : 'password'" label="密码" variant="outlined" density="comfortable" hide-details class="mb-3" prepend-inner-icon="mdi-lock-outline">
+          <v-text-field v-model="loginUsername" label="用户名" variant="outlined" density="comfortable" hide-details class="mb-3" prepend-inner-icon="mdi-account-outline" autocomplete="username" name="username" />
+          <v-text-field v-model="loginPassword" :type="showPwd ? 'text' : 'password'" label="密码" variant="outlined" density="comfortable" hide-details class="mb-3" prepend-inner-icon="mdi-lock-outline" :autocomplete="isRegister ? 'new-password' : 'current-password'" spellcheck="false">
             <template #append-inner>
               <v-btn :icon="showPwd ? 'mdi-eye-off' : 'mdi-eye'" size="x-small" variant="text" @click.stop="showPwd = !showPwd" />
             </template>
           </v-text-field>
-          <v-text-field v-if="isRegister" v-model="loginConfirm" :type="showPwd ? 'text' : 'password'" label="确认密码" variant="outlined" density="comfortable" hide-details class="mb-3" prepend-inner-icon="mdi-lock-outline" />
+          <v-text-field v-if="isRegister" v-model="loginConfirm" :type="showPwd ? 'text' : 'password'" label="确认密码" variant="outlined" density="comfortable" hide-details class="mb-3" prepend-inner-icon="mdi-lock-outline" autocomplete="new-password" spellcheck="false" />
           <v-btn type="submit" color="primary" variant="flat" size="large" block class="rounded-pill mt-2"
             :disabled="isRegister && !allowRegister">
 {{ isRegister && !allowRegister ? '注册已关闭' : (isRegister ? '注册并登录' : '登录') }}

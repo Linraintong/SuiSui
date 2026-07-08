@@ -124,7 +124,7 @@ async function toggleReaction(emoji: string) {
           <v-menu v-model="showEmojiPicker" :close-on-content-click="false" location="top" transition="fade-transition">
             <template #activator="{ props: menuProps }">
               <v-btn icon="mdi-plus-circle-outline" size="x-small" variant="text"
-                class="reaction-add-btn" v-bind="menuProps" />
+                class="reaction-add-btn" aria-label="添加反应" v-bind="menuProps" />
             </template>
             <div class="emoji-picker" style="width:280px">
               <div class="d-flex ga-1 pa-2" style="border-bottom:1px solid rgba(var(--v-theme-on-surface),0.08);overflow-x:auto">

@@ -251,20 +251,20 @@ async function movePinnedNote(note: Note, dir: "up" | "down") {
         </div>
         <div class="view-bar">
           <div class="view-bar-btns">
-            <button class="view-bar-btn" :class="{ active: viewMode === 'list' }" @click="viewMode = 'list'">
+            <button class="view-bar-btn" :class="{ active: viewMode === 'list' }" :aria-pressed="viewMode === 'list'" @click="viewMode = 'list'">
               <v-icon size="small">mdi-view-list</v-icon>
               <span>列表</span>
             </button>
-            <button class="view-bar-btn" :class="{ active: viewMode === 'timeline' }" @click="viewMode = 'timeline'">
+            <button class="view-bar-btn" :class="{ active: viewMode === 'timeline' }" :aria-pressed="viewMode === 'timeline'" @click="viewMode = 'timeline'">
               <v-icon size="small">mdi-timeline</v-icon>
               <span>时间线</span>
             </button>
           </div>
         </div>
-        <div v-if="newNotesCount > 0" class="new-notes-bar" @click="refreshNotes">
+        <button v-if="newNotesCount > 0" class="new-notes-bar" @click="refreshNotes">
           <v-icon size="small" color="primary">mdi-arrow-up-circle</v-icon>
           <span>有 {{ newNotesCount }} 条新的碎片笔记</span>
-        </div>
+        </button>
         <div v-if="store.notes.length === 0" class="empty-state">
           <div class="empty-illust">
             <template v-if="localSearch || selectedTag || selectedDay">

@@ -5,6 +5,7 @@ import { useAuthStore } from "@/stores/auth"
 import { authFetch } from "@/utils/api"
 import AdminProfile from "@/components/AdminProfile.vue"
 import AdminSystem from "@/components/AdminSystem.vue"
+import AppLogo from "@/components/AppLogo.vue"
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -22,7 +23,7 @@ interface AdminUser {
   createdAt: number
 }
 
-const tab = ref("overview")
+const tab = ref("profile")
 const stats = ref<AdminStats | null>(null)
 const users = ref<AdminUser[]>([])
 const loading = ref(false)
@@ -33,8 +34,7 @@ const deleteTarget = ref<number | null>(null)
 watch(tab, () => window.scrollTo(0, 0))
 
 onMounted(() => {
-  if (auth.userRole !== "admin") tab.value = "profile"
-  else { loadData() }
+  if (auth.isAdmin) { loadData() }
 })
 
 watch(() => auth.userRole, (val) => { if (val !== "admin") tab.value = "profile" })
@@ -74,145 +74,156 @@ function formatDate(ts: number) { return new Date(ts).toLocaleString("zh-CN") }
 </script>
 
 <template>
-  <div class="admin-page">
-    <div class="admin-header">
-      <v-btn icon="mdi-arrow-left" variant="text" size="small" class="back-btn" @click="router.push('/')" />
-      <div class="admin-title-area">
-        <h1 class="admin-title">后台管理</h1>
-        <p class="admin-subtitle">管理用户与碎片笔记</p>
+  <div class="settings-page">
+    <div class="settings-container">
+      <!-- Header -->
+      <div class="settings-header">
+        <div class="settings-header-left">
+          <v-btn icon="mdi-arrow-left" variant="text" size="small" class="back-btn" @click="router.push('/')" />
+          <AppLogo :size="24" />
+          <span class="settings-title">设置</span>
+        </div>
       </div>
-      <v-spacer />
-      <v-btn prepend-icon="mdi-refresh" variant="tonal" size="small" :loading="loading" class="refresh-btn" @click="loadData">刷新</v-btn>
-    </div>
 
-    <div class="admin-tabs" role="tablist">
-      <button v-if="auth.isAdmin" :class="['tab-item', { active: tab === 'overview' }]" role="tab" :aria-selected="tab === 'overview'" @click="tab = 'overview'">
-        <v-icon size="small" class="tab-icon">mdi-view-dashboard</v-icon>
-        <span>概览</span>
-      </button>
-      <button v-if="auth.isAdmin" :class="['tab-item', { active: tab === 'system' }]" role="tab" :aria-selected="tab === 'system'" @click="tab = 'system'">
-        <v-icon size="small" class="tab-icon">mdi-cog</v-icon>
-        <span>系统设置</span>
-      </button>
-      <button v-if="auth.isAdmin" :class="['tab-item', { active: tab === 'users' }]" role="tab" :aria-selected="tab === 'users'" @click="tab = 'users'">
-        <v-icon size="small" class="tab-icon">mdi-account-group</v-icon>
-        <span>用户管理</span>
-      </button>
-      <button :class="['tab-item', { active: tab === 'profile' }]" role="tab" :aria-selected="tab === 'profile'" @click="tab = 'profile'">
-        <v-icon size="small" class="tab-icon">mdi-account</v-icon>
-        <span>个人资料</span>
-      </button>
-    </div>
+      <!-- Tabs -->
+      <div class="settings-tabs" role="tablist">
+        <button :class="['tab-item', { active: tab === 'profile' }]" role="tab" :aria-selected="tab === 'profile'" @click="tab = 'profile'">
+          <v-icon size="small" class="tab-icon">mdi-account</v-icon>
+          <span>个人资料</span>
+        </button>
+        <button v-if="auth.isAdmin" :class="['tab-item', { active: tab === 'overview' }]" role="tab" :aria-selected="tab === 'overview'" @click="tab = 'overview'">
+          <v-icon size="small" class="tab-icon">mdi-view-dashboard</v-icon>
+          <span>概览</span>
+        </button>
+        <button v-if="auth.isAdmin" :class="['tab-item', { active: tab === 'system' }]" role="tab" :aria-selected="tab === 'system'" @click="tab = 'system'">
+          <v-icon size="small" class="tab-icon">mdi-cog</v-icon>
+          <span>系统设置</span>
+        </button>
+        <button v-if="auth.isAdmin" :class="['tab-item', { active: tab === 'users' }]" role="tab" :aria-selected="tab === 'users'" @click="tab = 'users'">
+          <v-icon size="small" class="tab-icon">mdi-account-group</v-icon>
+          <span>用户管理</span>
+        </button>
+      </div>
 
-    <Transition name="fade" mode="out-in">
-      <div :key="tab" class="tab-content">
-        <!-- === Overview Tab === -->
-        <template v-if="tab === 'overview' && auth.isAdmin">
-          <div class="stats-grid">
-            <div class="stat-card stat-users">
-              <div class="stat-icon-wrap">
-                <v-icon size="28">mdi-account</v-icon>
+      <!-- Tab Content -->
+      <Transition name="fade" mode="out-in">
+        <div :key="tab" class="tab-content">
+          <!-- Profile -->
+          <template v-if="tab === 'profile'">
+            <AdminProfile />
+          </template>
+
+          <!-- Overview -->
+          <template v-if="tab === 'overview' && auth.isAdmin">
+            <div class="stats-grid">
+              <div class="stat-card stat-users">
+                <div class="stat-icon-wrap">
+                  <v-icon size="28">mdi-account</v-icon>
+                </div>
+                <div class="stat-info">
+                  <span class="stat-label">用户总数</span>
+                  <span class="stat-value">{{ stats?.totalUsers || 0 }}</span>
+                </div>
               </div>
-              <div class="stat-info">
-                <span class="stat-label">用户总数</span>
-                <span class="stat-value">{{ stats?.totalUsers || 0 }}</span>
+              <div class="stat-card stat-notes">
+                <div class="stat-icon-wrap">
+                  <v-icon size="28">mdi-pencil-box-multiple</v-icon>
+                </div>
+                <div class="stat-info">
+                  <span class="stat-label">碎片笔记</span>
+                  <span class="stat-value">{{ stats?.totalNotes || 0 }}</span>
+                </div>
               </div>
             </div>
-            <div class="stat-card stat-notes">
-              <div class="stat-icon-wrap">
-                <v-icon size="28">mdi-pencil-box-multiple</v-icon>
+          </template>
+
+          <!-- System -->
+          <template v-if="tab === 'system' && auth.isAdmin">
+            <AdminSystem />
+          </template>
+
+          <!-- Users -->
+          <template v-if="tab === 'users' && auth.isAdmin">
+            <div class="users-card">
+              <div class="users-card-header">
+                <v-icon size="small" color="primary">mdi-account-group</v-icon>
+                <span class="users-card-title">用户管理</span>
+                <span class="users-count-badge">{{ userTotal }}</span>
               </div>
-              <div class="stat-info">
-                <span class="stat-label">碎片笔记</span>
-                <span class="stat-value">{{ stats?.totalNotes || 0 }}</span>
+
+              <div v-if="loading" class="loading-area">
+                <v-progress-circular indeterminate color="primary" size="36" />
               </div>
-            </div>
-          </div>
-        </template>
 
-        <!-- === System Tab === -->
-        <template v-if="tab === 'system' && auth.isAdmin">
-          <AdminSystem />
-        </template>
+              <div v-else-if="!users.length" class="empty-area">
+                <v-icon size="40" color="disabled">mdi-account-off</v-icon>
+                <span class="text-body-2 text-medium-emphasis mt-2">暂无用户</span>
+              </div>
 
-        <!-- === Users Tab === -->
-        <template v-if="tab === 'users' && auth.isAdmin">
-          <div class="users-card">
-            <div class="users-card-header">
-              <v-icon size="small" color="primary">mdi-account-group</v-icon>
-              <span class="users-card-title">用户管理</span>
-              <span class="users-count-badge">{{ userTotal }}</span>
-            </div>
-
-            <div v-if="loading" class="loading-area">
-              <v-progress-circular indeterminate color="primary" size="36" />
-            </div>
-
-            <div v-else-if="!users.length" class="empty-area">
-              <v-icon size="40" color="disabled">mdi-account-off</v-icon>
-              <span class="text-body-2 text-medium-emphasis mt-2">暂无用户</span>
-            </div>
-
-            <div v-else class="users-list">
-              <div v-for="u in users" :key="u.id" class="user-item">
-                <div class="user-item-left">
-                  <v-avatar size="38" :color="u.role === 'admin' ? 'warning' : 'primary'" variant="tonal">
-                    <span class="text-body-2 font-weight-medium">{{ u.nickname?.charAt(0)?.toUpperCase() || u.username.charAt(0).toUpperCase() }}</span>
-                  </v-avatar>
-                  <div class="user-item-info">
-                    <div class="user-item-name">
-                      <span>{{ u.nickname || u.username }}</span>
-                      <span v-if="u.role === 'admin'" class="admin-badge">管理员</span>
-                    </div>
-                    <div class="user-item-meta">
-                      @{{ u.username }} · {{ u.memoCount }} 条备忘 · {{ formatDate(u.createdAt) }}
+              <div v-else class="users-list">
+                <div v-for="u in users" :key="u.id" class="user-item">
+                  <div class="user-item-left">
+                    <v-avatar size="38" :color="u.role === 'admin' ? 'warning' : 'primary'" variant="tonal">
+                      <span class="text-body-2 font-weight-medium">{{ u.nickname?.charAt(0)?.toUpperCase() || u.username.charAt(0).toUpperCase() }}</span>
+                    </v-avatar>
+                    <div class="user-item-info">
+                      <div class="user-item-name">
+                        <span>{{ u.nickname || u.username }}</span>
+                        <span v-if="u.role === 'admin'" class="admin-badge">管理员</span>
+                      </div>
+                      <div class="user-item-meta">
+                        @{{ u.username }} · {{ u.memoCount }} 条备忘 · {{ formatDate(u.createdAt) }}
+                      </div>
                     </div>
                   </div>
+                  <v-btn v-if="u.role !== 'admin'" icon="mdi-delete-outline" size="small" variant="text" color="error"
+                    :loading="deleting === u.id" class="delete-user-btn" @click="confirmDelete(u.id)" />
                 </div>
-                <v-btn v-if="u.role !== 'admin'" icon="mdi-delete-outline" size="small" variant="text" color="error"
-                  :loading="deleting === u.id" class="delete-user-btn" @click="confirmDelete(u.id)" />
+              </div>
+
+              <div v-if="users.length" class="pagination-bar">
+                <v-btn size="small" variant="tonal" class="page-btn" :disabled="userPage <= 1" @click="prevPage">
+                  <v-icon size="x-small">mdi-chevron-left</v-icon> 上一页
+                </v-btn>
+                <span class="page-info">{{ userPage }} / {{ Math.ceil(userTotal / userPerPage) || 1 }}</span>
+                <v-btn size="small" variant="tonal" class="page-btn" :disabled="userPage * userPerPage >= userTotal" @click="nextPage">
+                  下一页 <v-icon size="x-small">mdi-chevron-right</v-icon>
+                </v-btn>
               </div>
             </div>
+          </template>
+        </div>
+      </Transition>
 
-            <div v-if="users.length" class="pagination-bar">
-              <v-btn size="small" variant="tonal" class="page-btn" :disabled="userPage <= 1" @click="prevPage">
-                <v-icon size="x-small">mdi-chevron-left</v-icon> 上一页
-              </v-btn>
-              <span class="page-info">{{ userPage }} / {{ Math.ceil(userTotal / userPerPage) || 1 }}</span>
-              <v-btn size="small" variant="tonal" class="page-btn" :disabled="userPage * userPerPage >= userTotal" @click="nextPage">
-                下一页 <v-icon size="x-small">mdi-chevron-right</v-icon>
-              </v-btn>
-            </div>
+      <!-- Delete Confirmation Dialog -->
+      <v-dialog v-model="showDeleteDialog" max-width="380">
+        <v-card class="rounded-xl pa-4 delete-dialog-card">
+          <div class="d-flex align-center mb-3">
+            <v-icon color="error" class="mr-2">mdi-alert-circle-outline</v-icon>
+            <span class="text-subtitle-2 font-weight-medium">确认删除</span>
+            <v-spacer />
+            <v-btn icon="mdi-close" size="x-small" variant="text" @click="showDeleteDialog = false" />
           </div>
-        </template>
-
-        <!-- === Profile Tab === -->
-        <template v-if="tab === 'profile'">
-          <AdminProfile />
-</template>
-</div>
-    </Transition>
-
-    <v-dialog v-model="showDeleteDialog" max-width="380">
-      <v-card class="rounded-xl pa-4 delete-dialog-card">
-        <div class="d-flex align-center mb-3">
-          <v-icon color="error" class="mr-2">mdi-alert-circle-outline</v-icon>
-          <span class="text-subtitle-2 font-weight-medium">确认删除</span>
-          <v-spacer />
-          <v-btn icon="mdi-close" size="x-small" variant="text" @click="showDeleteDialog = false" />
-        </div>
-        <p class="text-body-2 mb-4 text-medium-emphasis">确定要删除此用户吗？此操作不可撤销，该用户的所有笔记也将被删除。</p>
-        <div class="d-flex justify-end ga-2">
-          <v-btn variant="text" size="small" @click="showDeleteDialog = false">取消</v-btn>
-          <v-btn color="error" variant="flat" size="small" :loading="deleting !== null" class="rounded-pill" @click="doDelete">确认删除</v-btn>
-        </div>
-      </v-card>
-    </v-dialog>
+          <p class="text-body-2 mb-4 text-medium-emphasis">确定要删除此用户吗？此操作不可撤销，该用户的所有笔记也将被删除。</p>
+          <div class="d-flex justify-end ga-2">
+            <v-btn variant="text" size="small" @click="showDeleteDialog = false">取消</v-btn>
+            <v-btn color="error" variant="flat" size="small" :loading="deleting !== null" class="rounded-pill" @click="doDelete">确认删除</v-btn>
+          </div>
+        </v-card>
+      </v-dialog>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.admin-page {
+.settings-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(var(--v-theme-primary), 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(var(--v-theme-primary), 0.04) 0%, transparent 50%),
+    rgb(var(--v-theme-background));
+}
+.settings-container {
   max-width: 900px;
   margin: 0 auto;
   padding: 24px;
@@ -220,33 +231,29 @@ function formatDate(ts: number) { return new Date(ts).toLocaleString("zh-CN") }
 }
 
 /* Header */
-.admin-header {
+.settings-header {
   display: flex;
   align-items: center;
   margin-bottom: 24px;
-  gap: 12px;
+}
+.settings-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 .back-btn {
   opacity: 0.55;
   transition: opacity 0.2s;
 }
 .back-btn:hover { opacity: 1; }
-.admin-title-area { flex: 1; }
-.admin-title {
-  font-size: 1.4rem;
+.settings-title {
+  font-size: 1.2rem;
   font-weight: 700;
-  line-height: 1.3;
   color: rgb(var(--v-theme-on-surface));
 }
-.admin-subtitle {
-  font-size: 0.85rem;
-  color: rgba(var(--v-theme-on-surface), 0.5);
-  margin-top: 2px;
-}
-.refresh-btn { border-radius: 10px; }
 
-/* Custom Tabs */
-.admin-tabs {
+/* Tabs */
+.settings-tabs {
   display: flex;
   gap: 4px;
   margin-bottom: 20px;
@@ -284,7 +291,7 @@ function formatDate(ts: number) { return new Date(ts).toLocaleString("zh-CN") }
 
 .tab-content { min-height: 200px; }
 
-/* Stats Grid */
+/* Stats */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -371,8 +378,6 @@ function formatDate(ts: number) { return new Date(ts).toLocaleString("zh-CN") }
   justify-content: center;
   padding: 48px 20px;
 }
-
-/* User List */
 .users-list { display: flex; flex-direction: column; }
 .user-item {
   display: flex;
@@ -447,14 +452,14 @@ function formatDate(ts: number) { return new Date(ts).toLocaleString("zh-CN") }
   -webkit-backdrop-filter: blur(16px);
 }
 
-/* Fade transition */
+/* Transition */
 .fade-enter-active, .fade-leave-active { transition: opacity 0.12s ease; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 
 /* Mobile */
 @media (max-width: 768px) {
-  .admin-page { padding: 12px; }
-  .admin-tabs { gap: 2px; padding: 3px; }
+  .settings-container { padding: 12px; }
+  .settings-tabs { gap: 2px; padding: 3px; }
   .tab-item { font-size: 0.78rem; padding: 6px 8px; gap: 4px; }
   .stats-grid { grid-template-columns: 1fr; }
   .user-item { padding: 10px 14px; }

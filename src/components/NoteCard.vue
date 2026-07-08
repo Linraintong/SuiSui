@@ -111,7 +111,7 @@ function copyShareLink() {
     <div class="card-inner">
       <div class="d-flex align-start ga-3 mb-2">
         <div class="avatar-wrap">
-          <v-img v-if="isImage(memo.avatar)" :src="memo.avatar" alt="" cover width="40" height="40" class="avatar-img" />
+          <v-img v-if="isImage(memo.avatar)" :src="memo.avatar" :alt="displayName(memo) + '的头像'" cover width="40" height="40" class="avatar-img" />
           <div v-else class="avatar-fallback">{{ displayName(memo).charAt(0).toUpperCase() }}</div>
         </div>
         <div class="flex-grow-1" style="min-width:0;overflow:hidden">
@@ -124,21 +124,21 @@ function copyShareLink() {
         <div class="d-flex ga-0 flex-shrink-0" style="margin-top:2px;align-items:center">
           <template v-if="loggedIn && (auth.isAdmin || memo.username === auth.userName)">
             <template v-if="memo.pinned">
-              <v-btn icon="mdi-chevron-up" size="x-small" variant="text" class="pin-move-btn" @click="emit('movePin', memo, 'up')" />
-              <v-btn icon="mdi-chevron-down" size="x-small" variant="text" class="pin-move-btn" @click="emit('movePin', memo, 'down')" />
+              <v-btn icon="mdi-chevron-up" size="x-small" variant="text" class="pin-move-btn" aria-label="上移" @click="emit('movePin', memo, 'up')" />
+              <v-btn icon="mdi-chevron-down" size="x-small" variant="text" class="pin-move-btn" aria-label="下移" @click="emit('movePin', memo, 'down')" />
             </template>
-            <v-btn icon="mdi-pencil" size="x-small" variant="text" class="action-btn" @click="emit('edit', memo)" />
-            <v-btn icon="mdi-pin-outline" size="x-small" variant="text"
+            <v-btn icon="mdi-pencil" size="x-small" variant="text" class="action-btn" aria-label="编辑" @click="emit('edit', memo)" />
+            <v-btn icon="mdi-pin-outline" size="x-small" variant="text" aria-label="置顶"
               :color="memo.pinned ? 'primary' : undefined" class="action-btn"
               @click="store.togglePin(memo.id)" />
-            <v-btn icon="mdi-delete" size="x-small" variant="text" color="error" class="action-btn"
+            <v-btn icon="mdi-delete" size="x-small" variant="text" color="error" class="action-btn" aria-label="删除"
               @click="store.deleteNote(memo.id, auth.userName)" />
           </template>
-          <v-btn icon="mdi-share-variant" size="x-small" variant="text" class="action-btn"
+          <v-btn icon="mdi-share-variant" size="x-small" variant="text" class="action-btn" aria-label="分享"
             @click="shareNote" />
           <v-menu location="bottom">
             <template #activator="{ props: menuProps }">
-              <v-btn icon="mdi-dots-horizontal" size="x-small" variant="text" class="action-btn" v-bind="menuProps" />
+              <v-btn icon="mdi-dots-horizontal" size="x-small" variant="text" class="action-btn" aria-label="更多操作" v-bind="menuProps" />
             </template>
             <v-list density="compact" class="pa-1">
               <v-list-item density="compact" @click="copyContent">
@@ -224,7 +224,7 @@ function copyShareLink() {
     </v-card>
   </v-dialog>
   <Transition name="toast-fade">
-    <div v-if="showCopiedToast" class="copy-toast">
+    <div v-if="showCopiedToast" class="copy-toast" aria-live="polite">
       <v-icon size="small" class="mr-1">mdi-check</v-icon>已复制
     </div>
   </Transition>

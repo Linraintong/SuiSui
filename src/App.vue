@@ -6,7 +6,6 @@ import { useAuthStore } from "@/stores/auth"
 import { isImage } from "@/utils/url"
 import { API_BASE_URL } from "@/utils/api"
 
-import LoginDialog from "@/components/LoginDialog.vue"
 import AppLogo from "@/components/AppLogo.vue"
 import ThemePicker from "@/components/ThemePicker.vue"
 
@@ -17,13 +16,9 @@ const { mobile } = useDisplay()
 const isMobile = mobile
 
 const auth = useAuthStore()
-const showLogin = ref(false)
 const showMobileHeatmap = ref(false)
 provide("showMobileHeatmap", showMobileHeatmap)
-const showProfile = ref(false)
 const showThemePicker = ref(false)
-const nickEdit = ref("")
-const savingNick = ref(false)
 const snackMsg = ref("")
 const snackbar = ref(false)
 
@@ -60,17 +55,7 @@ async function loadSiteTitle() {
   } catch (e) { console.error("[App] failed to load site title:", e) }
 }
 
-function saveNickname() {
-  const n = nickEdit.value.trim()
-  if (!n || savingNick.value) return
-  savingNick.value = true
-  auth.updateNickname(n).then((err: string | null) => {
-    if (err) { snackMsg.value = err; snackbar.value = true } else { showProfile.value = false }
-    savingNick.value = false
-  }).catch((err) => { console.error("[App] saveNickname failed:", err); snackMsg.value = "保存失败"; snackbar.value = true; savingNick.value = false })
-}
 
-watch(showProfile, (v) => { if (v) nickEdit.value = auth.userNickname || "" })
 
 function applyThemeColor(color: string) {
   if (color && color !== "#1976D2") {
@@ -104,11 +89,11 @@ watch(() => vuetifyTheme.global.name.value, (val) => {
 
       <!-- User avatar & name in sidebar -->
       <div v-if="auth.ready && auth.isLoggedIn" class="sidebar-user">
-        <div v-if="isImage(auth.userAvatar)" class="sidebar-avatar-img" @click="showProfile = true">
+        <div v-if="isImage(auth.userAvatar)" class="sidebar-avatar-img" @click="router.push('/settings')" @keydown.enter="router.push('/settings')" role="button" tabindex="0" aria-label="设置">
           <img :src="auth.userAvatar" alt="" width="36" height="36" style="border-radius:10px;object-fit:cover;cursor:pointer" />
         </div>
         <v-avatar v-else size="36" color="primary" variant="tonal" class="sidebar-avatar" style="cursor:pointer"
-          @click="showProfile = true">
+          @click="router.push('/settings')" @keydown.enter="router.push('/settings')" role="button" tabindex="0" aria-label="设置">
           <span class="sidebar-avatar-text">{{ avatarLetter }}</span>
         </v-avatar>
         <span class="sidebar-username">{{ displayName }}</span>
@@ -116,15 +101,15 @@ watch(() => vuetifyTheme.global.name.value, (val) => {
 
       <div class="sidebar-middle" />
       <div class="sidebar-bottom">
-        <v-btn icon="mdi-palette-outline" variant="text" size="small" class="sidebar-btn" title="主题配色" @click.stop="showThemePicker = true" />
+        <v-btn icon="mdi-palette-outline" variant="text" size="small" class="sidebar-btn" title="主题配色" aria-label="主题配色" @click.stop="showThemePicker = true" />
         <template v-if="auth.ready && auth.isLoggedIn">
-          <v-btn icon="mdi-cog-outline" variant="text" size="small" class="sidebar-btn"
-            :color="route.path === '/admin' ? 'primary' : undefined"
-            @click.stop="router.push(route.path === '/admin' ? '/' : '/admin')" />
-          <v-btn icon="mdi-logout" variant="text" size="small" class="sidebar-btn" @click.stop="auth.logout()" />
+          <v-btn icon="mdi-cog-outline" variant="text" size="small" class="sidebar-btn" aria-label="设置"
+            :color="route.path === '/settings' ? 'primary' : undefined"
+            @click.stop="router.push(route.path === '/settings' ? '/' : '/settings')" />
+          <v-btn icon="mdi-logout" variant="text" size="small" class="sidebar-btn" aria-label="退出登录" @click.stop="auth.logout()" />
         </template>
-        <v-btn v-else icon="mdi-login" variant="text" size="small" class="sidebar-btn"
-          @click.stop="showLogin = true" />
+        <v-btn v-else icon="mdi-login" variant="text" size="small" class="sidebar-btn" aria-label="登录"
+          @click.stop="router.push('/login')" />
       </div>
     </div>
 
@@ -132,7 +117,7 @@ watch(() => vuetifyTheme.global.name.value, (val) => {
     <div v-if="isMobile" class="mobile-bottom-bar">
       <div class="mobile-bar-inner">
         <template v-if="auth.ready && auth.isLoggedIn">
-          <div class="d-flex align-center ga-1" style="cursor:pointer" @click="showProfile = true">
+          <div class="d-flex align-center ga-1" style="cursor:pointer" @click="router.push('/settings')" @keydown.enter="router.push('/settings')" role="button" tabindex="0" aria-label="设置">
             <div v-if="isImage(auth.userAvatar)" class="mobile-avatar">
               <img :src="auth.userAvatar" alt="" width="26" height="26" style="border-radius:6px;object-fit:cover" />
             </div>
@@ -143,26 +128,26 @@ watch(() => vuetifyTheme.global.name.value, (val) => {
           <AppLogo :size="22" />
         </template>
         <v-spacer />
-        <button class="mobile-bar-item" @click.stop="showThemePicker = true">
-          <v-icon size="small">mdi-palette-outline</v-icon>
+        <button class="mobile-bar-item" @click.stop="showThemePicker = true" aria-label="主题">
+          <v-icon size="small" aria-hidden="true">mdi-palette-outline</v-icon>
           <span class="mobile-bar-label">主题</span>
         </button>
-        <button class="mobile-bar-item" @click.stop="showMobileHeatmap = !showMobileHeatmap">
-          <v-icon size="small" :color="showMobileHeatmap ? 'primary' : undefined">mdi-fire</v-icon>
+        <button class="mobile-bar-item" @click.stop="showMobileHeatmap = !showMobileHeatmap" aria-label="热力图">
+          <v-icon size="small" :color="showMobileHeatmap ? 'primary' : undefined" aria-hidden="true">mdi-fire</v-icon>
           <span class="mobile-bar-label">热力</span>
         </button>
         <template v-if="auth.ready && auth.isLoggedIn">
-          <button class="mobile-bar-item" @click.stop="router.push(route.path === '/admin' ? '/' : '/admin')">
-            <v-icon size="small" :color="route.path === '/admin' ? 'primary' : undefined">mdi-cog-outline</v-icon>
-            <span class="mobile-bar-label">管理</span>
+          <button class="mobile-bar-item" @click.stop="router.push(route.path === '/settings' ? '/' : '/settings')" aria-label="设置">
+            <v-icon size="small" :color="route.path === '/settings' ? 'primary' : undefined" aria-hidden="true">mdi-cog-outline</v-icon>
+            <span class="mobile-bar-label">设置</span>
           </button>
-          <button class="mobile-bar-item" @click.stop="auth.logout()">
-            <v-icon size="small">mdi-logout</v-icon>
+          <button class="mobile-bar-item" @click.stop="auth.logout()" aria-label="退出登录">
+            <v-icon size="small" aria-hidden="true">mdi-logout</v-icon>
             <span class="mobile-bar-label">退出</span>
           </button>
         </template>
-        <button v-else class="mobile-bar-item" @click.stop="showLogin = true">
-          <v-icon size="small">mdi-login</v-icon>
+        <button v-else class="mobile-bar-item" @click.stop="router.push('/login')" aria-label="登录">
+          <v-icon size="small" aria-hidden="true">mdi-login</v-icon>
           <span class="mobile-bar-label">登录</span>
         </button>
       </div>
@@ -174,25 +159,7 @@ watch(() => vuetifyTheme.global.name.value, (val) => {
     <v-main v-else class="main-bg d-flex align-center justify-center" :class="{ 'has-sidebar': !isMobile, 'has-bottom-bar': isMobile }">
       <v-progress-circular indeterminate color="primary" />
     </v-main>
-    <LoginDialog v-model="showLogin" />
     <ThemePicker v-model="showThemePicker" />
-        <v-dialog v-model="showProfile" max-width="420" transition="scale-transition">
-      <v-card class="rounded-xl pa-4">
-        <div class="d-flex align-center mb-3">
-          <span class="text-subtitle-2 font-weight-medium">个人资料</span>
-          <v-spacer />
-          <v-btn icon="mdi-close" size="x-small" variant="text" @click="showProfile = false" />
-        </div>
-        <div class="d-flex flex-column ga-3">
-          <v-text-field v-model="nickEdit" label="昵称" variant="outlined" hide-details density="compact"
-            :disabled="savingNick" @keydown.enter="saveNickname" />
-          <v-btn color="primary" variant="flat" size="small" class="rounded-pill align-self-start"
-            :loading="savingNick" @click="saveNickname">
-保存昵称
-</v-btn>
-        </div>
-      </v-card>
-    </v-dialog>
     <v-snackbar v-model="snackbar" timeout="2000" color="error" variant="tonal">{{ snackMsg }}</v-snackbar>
   </v-app>
 </template>
@@ -236,6 +203,8 @@ body { font-family: inherit; }
   top: 0;
   width: 64px;
   height: 100vh;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -296,12 +265,20 @@ body { font-family: inherit; }
 }
 .sidebar-btn:hover { opacity: 1; transform: scale(1.1); background: rgba(var(--v-theme-primary), 0.06); }
 
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-btn, .sidebar-avatar, .sidebar-avatar-img, .memo-card, .main-bg, .v-main {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
 .mobile-bottom-bar {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 56px;
+  height: calc(56px + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
   border-top: 1px solid rgba(var(--v-theme-on-surface), 0.08);
   background: rgba(var(--v-theme-surface), 0.6);
   backdrop-filter: blur(16px);

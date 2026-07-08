@@ -186,9 +186,9 @@ async function importNotes(e: Event) {
           <v-btn icon="mdi-close" size="x-small" variant="text" @click="showPwdDialog = false" />
         </div>
         <div class="d-flex flex-column ga-3">
-          <v-text-field v-model="pwdOld" type="password" variant="outlined" hide-details density="compact" placeholder="旧密码" autofocus />
-          <v-text-field v-model="pwdNew" type="password" variant="outlined" hide-details density="compact" placeholder="新密码（至少4位）" />
-          <v-text-field v-model="pwdConfirm" type="password" variant="outlined" hide-details density="compact" placeholder="确认新密码" />
+          <v-text-field v-model="pwdOld" type="password" variant="outlined" hide-details density="compact" placeholder="旧密码" autocomplete="current-password" spellcheck="false" autofocus />
+          <v-text-field v-model="pwdNew" type="password" variant="outlined" hide-details density="compact" placeholder="新密码（至少4位）" autocomplete="new-password" spellcheck="false" />
+          <v-text-field v-model="pwdConfirm" type="password" variant="outlined" hide-details density="compact" placeholder="确认新密码" autocomplete="new-password" spellcheck="false" />
         </div>
         <div class="d-flex justify-end ga-2 mt-3">
           <v-btn variant="text" size="small" @click="showPwdDialog = false">取消</v-btn>

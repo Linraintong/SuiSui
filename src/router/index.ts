@@ -3,6 +3,8 @@ import type { RouteRecordRaw } from "vue-router"
 import NotesPage from "@/views/NotesPage.vue"
 import AdminPage from "@/views/AdminPage.vue"
 import ShareView from "@/components/ShareView.vue"
+import LoginPage from "@/views/LoginPage.vue"
+import SettingsPage from "@/views/SettingsPage.vue"
 import { useAuthStore } from "@/stores/auth"
 
 const routes: RouteRecordRaw[] = [
@@ -23,6 +25,18 @@ const routes: RouteRecordRaw[] = [
     name: "share",
     component: ShareView,
     meta: { standalone: true, title: "分享 - 碎碎 SuiSui" },
+  },
+  {
+    path: "/login",
+    name: "login",
+    component: LoginPage,
+    meta: { standalone: true, title: "登录 - 碎碎 SuiSui" },
+  },
+  {
+    path: "/settings",
+    name: "settings",
+    component: SettingsPage,
+    meta: { standalone: true, title: "设置 - 碎碎 SuiSui" },
   },
   {
     path: "/:pathMatch(.*)*",

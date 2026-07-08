@@ -113,7 +113,7 @@ const rendered = computed(() => {
     const idx = localCodeBlockIdx++
     return `<div class="code-block">
       <pre><code>${escaped}</code></pre>
-      <button class="code-copy-btn" data-code="${encoded}" data-copy-idx="${idx}" title="复制代码"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+      <button class="code-copy-btn" data-code="${encoded}" data-copy-idx="${idx}" title="复制代码" aria-label="复制代码"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
     </div>`
   }
   tmpRenderer.listitem = ({ text, task, checked }) => {
@@ -275,6 +275,10 @@ function handleClick(e: MouseEvent) {
 .markdown-body .code-copy-btn:hover { background: rgba(var(--v-theme-primary), 0.08); color: rgb(var(--v-theme-primary)); }
 .markdown-body .code-copy-btn.copied { color: #22c55e; }
 .markdown-body .code-copy-btn.error { color: #ef4444; }
+@media (hover: none) {
+  .markdown-body .code-copy-btn { opacity: 0.6; }
+  .markdown-body .code-block:hover .code-copy-btn { opacity: 1; }
+}
 .markdown-body .code-block pre {
   margin: 0; padding: 12px 14px; background: none; border-radius: 0;
   font-size: 0.82em; line-height: 1.5; font-family: var(--code-font); overflow-x: auto;
